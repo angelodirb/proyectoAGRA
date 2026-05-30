@@ -4,6 +4,8 @@
 // ============================================================
 
 #include "Cube.h"
+#include <cassert>
+#include <set>
 
 // ------------------------------------------------------------
 // Constructor
@@ -13,7 +15,30 @@ Cube::Cube(int top, int bottom, int north, int south, int east, int west)
       north_(north), south_(south),
       east_(east), west_(west),
       gold_{false, false, false, false, false, false}
-{}
+{
+    // ----------------------------------------------------------
+    // Validacion defensiva: rango [0, 5]
+    //
+    // gold_[faceID] indexa directamente por ID de cara fisica.
+    // Un ID fuera de [0,5] causaria acceso fuera de limites.
+    // ----------------------------------------------------------
+    assert(top    >= 0 && top    < 6 && "top face ID fuera de rango [0,5]");
+    assert(bottom >= 0 && bottom < 6 && "bottom face ID fuera de rango [0,5]");
+    assert(north  >= 0 && north  < 6 && "north face ID fuera de rango [0,5]");
+    assert(south  >= 0 && south  < 6 && "south face ID fuera de rango [0,5]");
+    assert(east   >= 0 && east   < 6 && "east face ID fuera de rango [0,5]");
+    assert(west   >= 0 && west   < 6 && "west face ID fuera de rango [0,5]");
+
+    // ----------------------------------------------------------
+    // Validacion defensiva: unicidad
+    //
+    // Cada cara fisica debe tener un ID unico. IDs duplicados
+    // significarian que dos posiciones apuntan a la misma cara,
+    // lo cual corrompe las rotaciones y el sistema de oro.
+    // ----------------------------------------------------------
+    std::set<int> ids = { top, bottom, north, south, east, west };
+    assert(ids.size() == 6 && "Los 6 face IDs deben ser distintos");
+}
 
 // ------------------------------------------------------------
 // Getters
@@ -185,6 +210,16 @@ void Cube::putGoldOnBottom() {
 // ------------------------------------------------------------
 void Cube::removeGoldFromBottom() {
     gold_[bottom_] = false;
+}
+
+// ------------------------------------------------------------
+// faceHasGold
+// Retorna true si la cara fisica con ID faceID tiene oro.
+// Encapsula el acceso a gold_[] sin exponerlo directamente.
+// ------------------------------------------------------------
+bool Cube::faceHasGold(int faceID) const {
+    assert(faceID >= 0 && faceID < 6 && "faceID fuera de rango [0,5]");
+    return gold_[faceID];
 }
 
 // ------------------------------------------------------------

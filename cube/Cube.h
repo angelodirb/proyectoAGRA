@@ -91,6 +91,11 @@ public:
     // Quita oro de la cara fisica actualmente abajo
     void removeGoldFromBottom();
 
+    // Retorna si la cara fisica con el ID indicado tiene oro.
+    // Permite inspeccionar cualquier cara sin exponer gold_[].
+    // Precondicion: 0 <= faceID < 6  (validado con assert).
+    bool faceHasGold(int faceID) const;
+
     // Retorna cuantas caras fisicas tienen oro (0..6)
     int countGoldFaces() const;
 
