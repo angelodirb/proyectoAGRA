@@ -1,6 +1,6 @@
 // ============================================================
 // grid_tests.cpp
-// Pruebas unitarias para Grid y generateNextStates.
+// Pruebas unitarias para Grid y generateTransitions.
 //
 // Compilar (desde la raiz del proyecto):
 //   g++ -std=c++17 cube/Cube.cpp state/State.cpp \
@@ -174,14 +174,14 @@ void test5_goldCells() {
 }
 
 // ============================================================
-// TEST 6 - generateNextStates: esquina superior izquierda
+// TEST 6 - generateTransitions: esquina superior izquierda
 //
 // Desde (0,0):
 //   Norte : (-1, 0) fuera -> invalido
 //   Sur   : (1, 0) 'G'   -> valido
 //   Este  : (0, 1) 'G'   -> valido
 //   Oeste : (0,-1) fuera -> invalido
-// Resultado: 2 vecinos en orden [Sur, Este].
+// Resultado: 2 transiciones en orden [Sur, Este].
 // ============================================================
 void test6_cornerTopLeft() {
     std::cout << "\n--- TEST 6: Esquina superior izquierda ---\n";
@@ -189,25 +189,25 @@ void test6_cornerTopLeft() {
     Grid g(makeTestLayout());
     State s = makeStateAt(0, 0);
 
-    std::vector<State> neighbors = generateNextStates(s, g);
+    std::vector<TransitionResult> transitions = generateTransitions(s, g);
 
     reportTest("test6a: 2 vecinos desde (0,0)",
-               neighbors.size() == 2);
+               transitions.size() == 2);
     reportTest("test6b: vecino[0] es Sur -> (1,0)",
-               neighbors[0].row == 1 && neighbors[0].col == 0);
+               transitions[0].nextState.row == 1 && transitions[0].nextState.col == 0);
     reportTest("test6c: vecino[1] es Este -> (0,1)",
-               neighbors[1].row == 0 && neighbors[1].col == 1);
+               transitions[1].nextState.row == 0 && transitions[1].nextState.col == 1);
 }
 
 // ============================================================
-// TEST 7 - generateNextStates: celda adyacente a pared
+// TEST 7 - generateTransitions: celda adyacente a pared
 //
 // Desde (2,2):
 //   Norte : (1, 2) 'S'  -> valido
 //   Sur   : (3, 2) '.'  -> valido
 //   Este  : (2, 3) '#'  -> invalido (pared)
 //   Oeste : (2, 1) 'G'  -> valido
-// Resultado: 3 vecinos en orden [Norte, Sur, Oeste].
+// Resultado: 3 transiciones en orden [Norte, Sur, Oeste].
 // ============================================================
 void test7_adjacentToWall() {
     std::cout << "\n--- TEST 7: Celda adyacente a pared ---\n";
@@ -215,27 +215,27 @@ void test7_adjacentToWall() {
     Grid g(makeTestLayout());
     State s = makeStateAt(2, 2);
 
-    std::vector<State> neighbors = generateNextStates(s, g);
+    std::vector<TransitionResult> transitions = generateTransitions(s, g);
 
     reportTest("test7a: 3 vecinos desde (2,2)",
-               neighbors.size() == 3);
+               transitions.size() == 3);
     reportTest("test7b: vecino[0] es Norte -> (1,2)",
-               neighbors[0].row == 1 && neighbors[0].col == 2);
+               transitions[0].nextState.row == 1 && transitions[0].nextState.col == 2);
     reportTest("test7c: vecino[1] es Sur -> (3,2)",
-               neighbors[1].row == 3 && neighbors[1].col == 2);
+               transitions[1].nextState.row == 3 && transitions[1].nextState.col == 2);
     reportTest("test7d: vecino[2] es Oeste -> (2,1)",
-               neighbors[2].row == 2 && neighbors[2].col == 1);
+               transitions[2].nextState.row == 2 && transitions[2].nextState.col == 1);
 }
 
 // ============================================================
-// TEST 8 - generateNextStates: celda interior con 4 vecinos
+// TEST 8 - generateTransitions: celda interior con 4 vecinos
 //
 // Desde (1,1):
 //   Norte : (0,1) 'G' -> valido
 //   Sur   : (2,1) 'G' -> valido
 //   Este  : (1,2) 'S' -> valido
 //   Oeste : (1,0) 'G' -> valido
-// Resultado: 4 vecinos.
+// Resultado: 4 transiciones.
 // ============================================================
 void test8_interiorFourNeighbors() {
     std::cout << "\n--- TEST 8: Celda interior (4 vecinos) ---\n";
@@ -243,10 +243,10 @@ void test8_interiorFourNeighbors() {
     Grid g(makeTestLayout());
     State s = makeStateAt(1, 1);
 
-    std::vector<State> neighbors = generateNextStates(s, g);
+    std::vector<TransitionResult> transitions = generateTransitions(s, g);
 
     reportTest("test8a: 4 vecinos desde (1,1)",
-               neighbors.size() == 4);
+               transitions.size() == 4);
 }
 
 // ============================================================
@@ -272,51 +272,51 @@ void test9_orientationAndGold() {
     Grid g(makeTestLayout());
     State s = makeStateAt(1, 1);
 
-    std::vector<State> neighbors = generateNextStates(s, g);
+    std::vector<TransitionResult> transitions = generateTransitions(s, g);
 
-    // Verificar que se generaron exactamente 4 vecinos
-    if (neighbors.size() != 4) {
+    // Verificar que se generaron exactamente 4 transiciones
+    if (transitions.size() != 4) {
         reportTest("test9: precondicion (4 vecinos)", false);
         return;
     }
 
     // Caras bottom despues de cada rotacion
     reportTest("test9a: Norte -> bottom = cara 2 (rollNorth)",
-               neighbors[0].cube.getBottom() == 2);
+               transitions[0].nextState.cube.getBottom() == 2);
     reportTest("test9b: Sur   -> bottom = cara 3 (rollSouth)",
-               neighbors[1].cube.getBottom() == 3);
+               transitions[1].nextState.cube.getBottom() == 3);
     reportTest("test9c: Este  -> bottom = cara 4 (rollEast)",
-               neighbors[2].cube.getBottom() == 4);
+               transitions[2].nextState.cube.getBottom() == 4);
     reportTest("test9d: Oeste -> bottom = cara 5 (rollWest)",
-               neighbors[3].cube.getBottom() == 5);
+               transitions[3].nextState.cube.getBottom() == 5);
 
     // Norte a (0,1): CASO 1, cara 2 recoge oro
     reportTest("test9e: Norte: faceHasGold(2) == true",
-               neighbors[0].cube.faceHasGold(2));
+               transitions[0].nextState.cube.faceHasGold(2));
     reportTest("test9f: Norte: remainingGold[0] == false",
-               !neighbors[0].remainingGold[0]);
+               !transitions[0].nextState.remainingGold[0]);
 
     // Sur a (2,1): CASO 1, cara 3 recoge oro
     reportTest("test9g: Sur: faceHasGold(3) == true",
-               neighbors[1].cube.faceHasGold(3));
+               transitions[1].nextState.cube.faceHasGold(3));
     reportTest("test9h: Sur: remainingGold[4] == false",
-               !neighbors[1].remainingGold[4]);
+               !transitions[1].nextState.remainingGold[4]);
 
     // Este a (1,2): 'S', no es celda de oro
     reportTest("test9i: Este: sin interaccion de oro (0 caras con oro)",
-               neighbors[2].cube.countGoldFaces() == 0);
+               transitions[2].nextState.cube.countGoldFaces() == 0);
 
     // Oeste a (1,0): CASO 1, cara 5 recoge oro
     reportTest("test9j: Oeste: faceHasGold(5) == true",
-               neighbors[3].cube.faceHasGold(5));
+               transitions[3].nextState.cube.faceHasGold(5));
     reportTest("test9k: Oeste: remainingGold[2] == false",
-               !neighbors[3].remainingGold[2]);
+               !transitions[3].nextState.remainingGold[2]);
 }
 
 // ============================================================
 // TEST 10 - Value semantics: estado original no se modifica
 //
-// generateNextStates debe retornar copias independientes.
+// generateTransitions debe retornar copias independientes.
 // El State de entrada NO debe ser modificado en ningun campo.
 // Modificar un vecino tampoco debe afectar el original.
 // ============================================================
@@ -326,7 +326,7 @@ void test10_valueSemantics() {
     Grid g(makeTestLayout());
     State original = makeStateAt(1, 1);
 
-    std::vector<State> neighbors = generateNextStates(original, g);
+    std::vector<TransitionResult> transitions = generateTransitions(original, g);
 
     // El original no debe haberse modificado
     reportTest("test10a: original.row sin cambios",
@@ -343,7 +343,7 @@ void test10_valueSemantics() {
                allRemainingUnchanged);
 
     // Modificar un vecino no debe afectar el original
-    neighbors[0].row = 99;
+    transitions[0].nextState.row = 99;
     reportTest("test10e: modificar vecino no afecta original.row",
                original.row == 1);
 }
