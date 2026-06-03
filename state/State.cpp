@@ -12,21 +12,20 @@
 // ------------------------------------------------------------
 State::State(int row, int col,
              const Cube& cube,
-             const std::array<bool, 6>& remainingGold)
+             uint64_t cellGold)
     : row(row), col(col),
       cube(cube),
-      remainingGold(remainingGold)
+      cellGold(cellGold)
 {}
 
 // ------------------------------------------------------------
-// remainingGoldCount
-// Recorre remainingGold y cuenta cuantos son true.
+// cellGoldCount
+// Popcount del bitmask: cada bit encendido es una celda con oro.
 // ------------------------------------------------------------
-int State::remainingGoldCount() const {
+int State::cellGoldCount() const {
+    uint64_t v = cellGold;
     int count = 0;
-    for (bool hasGold : remainingGold) {
-        if (hasGold) ++count;
-    }
+    while (v) { v &= v - 1; ++count; }
     return count;
 }
 
@@ -71,14 +70,10 @@ void State::printState() const {
     std::cout << "  Total caras con oro : "
               << cube.countGoldFaces() << " / 6\n";
 
-    // Oro restante en las celdas de la grilla
-    std::cout << "\nOro en celdas originales:\n";
-    for (int i = 0; i < 6; ++i) {
-        std::cout << "  celda " << i << " : "
-                  << (remainingGold[i] ? "tiene oro" : "recogido") << "\n";
-    }
-    std::cout << "  Total celdas con oro : "
-              << remainingGoldCount() << " / 6\n";
+    // Oro en celdas de la grilla (bitmask)
+    std::cout << "\nOro en celdas (bitmask): 0x"
+              << std::hex << cellGold << std::dec
+              << "  (" << cellGoldCount() << " celda(s))\n";
 
     // Estado del objetivo
     std::cout << "\nObjetivo (6 caras con oro) : "
@@ -109,8 +104,8 @@ bool State::operator==(const State& other) const {
         if (cube.faceHasGold(i) != other.cube.faceHasGold(i)) return false;
     }
 
-    // Oro restante en celdas
-    if (remainingGold != other.remainingGold) return false;
+    // Oro en celdas
+    if (cellGold != other.cellGold) return false;
 
     return true;
 }

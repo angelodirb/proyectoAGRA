@@ -1,0 +1,1248 @@
+===========================================
+  Solver Tests
+===========================================
+
+--- TEST 1: Grid imposible ---
+[PASS] test1a: resultado == -1 (sin solucion)
+
+--- TEST 2: Solucion existe ---
+[PASS] test2a: resultado >= 0 (solucion existe)
+[PASS] test2b: resultado > 0  (no trivial: el cubo no nace con oro)
+
+--- TEST 3: Grid con paredes ---
+[PASS] test3a: resultado != -1 (solucion existe pese a pared)
+[PASS] test3b: resultado >= 6  (minimo provable: 6 eventos CASO 1)
+
+--- TEST 4: Distancia exacta = 6 ---
+[PASS] test4a: resultado == 6 (camino optimo exacto)
+
+--- TEST 5: Determinismo y terminacion ---
+[PASS] test5a: primera llamada termina  (>= -1)
+[PASS] test5b: segunda llamada termina  (>= -1)
+[PASS] test5c: resultados identicos
+
+--- TEST 6: Modo debug ---
+
+[debug en grilla imposible]
+===========================================
+  Dijkstra Solver [debug=true]
+===========================================
+[INIT] pos=(0,3) goldFaces=0
+[EXPAND] dist=0 pos=(0,3) goldFaces=0
+  vecinos=2
+  [UPDATE] pos=(0,4) goldFaces=1 dist=1
+  [UPDATE] pos=(0,2) goldFaces=1 dist=1
+[EXPAND] dist=1 pos=(0,4) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(0,5) goldFaces=2 dist=2
+  [UPDATE] pos=(0,3) goldFaces=1 dist=2
+[EXPAND] dist=1 pos=(0,2) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(0,3) goldFaces=1 dist=2
+  [UPDATE] pos=(0,1) goldFaces=2 dist=2
+[EXPAND] dist=2 pos=(0,5) goldFaces=2
+  vecinos=1
+  [UPDATE] pos=(0,4) goldFaces=2 dist=3
+[EXPAND] dist=2 pos=(0,3) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(0,4) goldFaces=2 dist=3
+[EXPAND] dist=2 pos=(0,1) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,2) goldFaces=2 dist=3
+  [UPDATE] pos=(0,0) goldFaces=3 dist=3
+[EXPAND] dist=2 pos=(0,3) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(0,2) goldFaces=2 dist=3
+[EXPAND] dist=3 pos=(0,4) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,3) goldFaces=2 dist=4
+[EXPAND] dist=3 pos=(0,0) goldFaces=3
+  vecinos=1
+  [UPDATE] pos=(0,1) goldFaces=3 dist=4
+[EXPAND] dist=3 pos=(0,2) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,3) goldFaces=2 dist=4
+  [UPDATE] pos=(0,1) goldFaces=3 dist=4
+[EXPAND] dist=3 pos=(0,4) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,5) goldFaces=3 dist=4
+[EXPAND] dist=3 pos=(0,2) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,3) goldFaces=2 dist=4
+[EXPAND] dist=4 pos=(0,3) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,2) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(0,5) goldFaces=3
+  vecinos=1
+  [UPDATE] pos=(0,4) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(0,3) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,4) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(0,3) goldFaces=2
+  vecinos=2
+[EXPAND] dist=4 pos=(0,1) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,2) goldFaces=3 dist=5
+  [UPDATE] pos=(0,0) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(0,1) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,2) goldFaces=3 dist=5
+[EXPAND] dist=5 pos=(0,2) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+  [UPDATE] pos=(0,1) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(0,0) goldFaces=3
+  vecinos=1
+[EXPAND] dist=5 pos=(0,2) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(0,4) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,5) goldFaces=3 dist=6
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=3
+  vecinos=2
+[EXPAND] dist=5 pos=(0,4) goldFaces=3
+  vecinos=2
+[EXPAND] dist=6 pos=(0,3) goldFaces=3
+  vecinos=2
+[EXPAND] dist=6 pos=(0,5) goldFaces=3
+  vecinos=1
+[EXPAND] dist=6 pos=(0,3) goldFaces=3
+  vecinos=2
+[EXPAND] dist=6 pos=(0,1) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,0) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,4) goldFaces=3 dist=7
+[EXPAND] dist=7 pos=(0,0) goldFaces=3
+  vecinos=1
+[EXPAND] dist=7 pos=(0,4) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,5) goldFaces=3 dist=8
+[EXPAND] dist=8 pos=(0,5) goldFaces=3
+  vecinos=1
+[SIN SOLUCION]
+===========================================
+[PASS] test6a: debug en grilla imposible no crashea
+[PASS] test6b: debug e imposible coinciden (ambos -1)
+
+[debug en grilla con solucion]
+===========================================
+  Dijkstra Solver [debug=true]
+===========================================
+[INIT] pos=(3,0) goldFaces=0
+[EXPAND] dist=0 pos=(3,0) goldFaces=0
+  vecinos=2
+  [UPDATE] pos=(2,0) goldFaces=1 dist=1
+  [UPDATE] pos=(3,1) goldFaces=0 dist=1
+[EXPAND] dist=1 pos=(2,0) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,0) goldFaces=2 dist=2
+  [UPDATE] pos=(3,0) goldFaces=1 dist=2
+  [UPDATE] pos=(2,1) goldFaces=1 dist=2
+[EXPAND] dist=1 pos=(3,1) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(2,1) goldFaces=0 dist=2
+  [UPDATE] pos=(3,2) goldFaces=0 dist=2
+[EXPAND] dist=2 pos=(3,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=1 dist=3
+[EXPAND] dist=2 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=3
+  [UPDATE] pos=(3,1) goldFaces=1 dist=3
+  [UPDATE] pos=(2,2) goldFaces=1 dist=3
+[EXPAND] dist=2 pos=(3,2) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=0 dist=3
+  [UPDATE] pos=(3,3) goldFaces=0 dist=3
+[EXPAND] dist=2 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=3
+  [UPDATE] pos=(2,0) goldFaces=2 dist=3
+  [UPDATE] pos=(1,1) goldFaces=3 dist=3
+[EXPAND] dist=2 pos=(2,1) goldFaces=0
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=1 dist=3
+  [UPDATE] pos=(2,2) goldFaces=0 dist=3
+  [UPDATE] pos=(2,0) goldFaces=1 dist=3
+[EXPAND] dist=3 pos=(3,1) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(2,1) goldFaces=1 dist=4
+  [UPDATE] pos=(3,2) goldFaces=1 dist=4
+[EXPAND] dist=3 pos=(2,2) goldFaces=0
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=1 dist=4
+  [UPDATE] pos=(2,3) goldFaces=0 dist=4
+  [UPDATE] pos=(2,1) goldFaces=0 dist=4
+[EXPAND] dist=3 pos=(1,1) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=3 dist=4
+  [UPDATE] pos=(2,1) goldFaces=3 dist=4
+  [UPDATE] pos=(1,2) goldFaces=4 dist=4
+  [UPDATE] pos=(1,0) goldFaces=3 dist=4
+[EXPAND] dist=3 pos=(2,0) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,0) goldFaces=2 dist=4
+  [UPDATE] pos=(3,0) goldFaces=1 dist=4
+  [UPDATE] pos=(2,1) goldFaces=1 dist=4
+[EXPAND] dist=3 pos=(3,1) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,2) goldFaces=1 dist=4
+  [UPDATE] pos=(3,0) goldFaces=1 dist=4
+[EXPAND] dist=3 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=2 dist=4
+  [UPDATE] pos=(2,1) goldFaces=2 dist=4
+  [UPDATE] pos=(1,2) goldFaces=3 dist=4
+  [UPDATE] pos=(1,0) goldFaces=2 dist=4
+[EXPAND] dist=3 pos=(3,3) goldFaces=0
+  vecinos=2
+  [UPDATE] pos=(2,3) goldFaces=0 dist=4
+[EXPAND] dist=3 pos=(2,2) goldFaces=0
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=1 dist=4
+  [UPDATE] pos=(3,2) goldFaces=0 dist=4
+  [UPDATE] pos=(2,3) goldFaces=0 dist=4
+[EXPAND] dist=3 pos=(1,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=1 dist=4
+  [UPDATE] pos=(2,1) goldFaces=1 dist=4
+  [UPDATE] pos=(1,2) goldFaces=2 dist=4
+  [UPDATE] pos=(1,0) goldFaces=2 dist=4
+[EXPAND] dist=3 pos=(2,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=2 dist=4
+  [UPDATE] pos=(3,2) goldFaces=1 dist=4
+  [UPDATE] pos=(2,3) goldFaces=1 dist=4
+[EXPAND] dist=3 pos=(2,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,0) goldFaces=2 dist=4
+  [UPDATE] pos=(2,1) goldFaces=2 dist=4
+[EXPAND] dist=3 pos=(0,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,1) goldFaces=2 dist=4
+[EXPAND] dist=4 pos=(3,2) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=1 dist=5
+  [UPDATE] pos=(3,3) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(0,1) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=4 dist=5
+  [UPDATE] pos=(0,0) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(1,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=3 dist=5
+  [UPDATE] pos=(2,0) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(3,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=5
+  [UPDATE] pos=(3,1) goldFaces=2 dist=5
+  [UPDATE] pos=(2,2) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,1) goldFaces=2 dist=5
+  [UPDATE] pos=(0,2) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(3,2) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=1 dist=5
+  [UPDATE] pos=(3,1) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(2,3) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=0 dist=5
+  [UPDATE] pos=(3,3) goldFaces=0 dist=5
+[EXPAND] dist=4 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=2 dist=5
+  [UPDATE] pos=(2,2) goldFaces=2 dist=5
+  [UPDATE] pos=(1,3) goldFaces=2 dist=5
+  [UPDATE] pos=(1,1) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=3 dist=5
+  [UPDATE] pos=(2,2) goldFaces=2 dist=5
+  [UPDATE] pos=(1,3) goldFaces=2 dist=5
+  [UPDATE] pos=(1,1) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(1,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=2 dist=5
+  [UPDATE] pos=(2,2) goldFaces=1 dist=5
+  [UPDATE] pos=(1,3) goldFaces=1 dist=5
+  [UPDATE] pos=(1,1) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(2,1) goldFaces=0
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=1 dist=5
+  [UPDATE] pos=(3,1) goldFaces=0 dist=5
+  [UPDATE] pos=(2,0) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=1 dist=5
+  [UPDATE] pos=(2,2) goldFaces=1 dist=5
+  [UPDATE] pos=(2,0) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(0,1) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=2 dist=5
+  [UPDATE] pos=(0,0) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=5
+  [UPDATE] pos=(2,2) goldFaces=1 dist=5
+  [UPDATE] pos=(2,0) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(3,2) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=0 dist=5
+  [UPDATE] pos=(3,1) goldFaces=0 dist=5
+[EXPAND] dist=4 pos=(1,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=2 dist=5
+  [UPDATE] pos=(2,2) goldFaces=1 dist=5
+  [UPDATE] pos=(1,3) goldFaces=1 dist=5
+  [UPDATE] pos=(1,1) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=5
+  [UPDATE] pos=(3,1) goldFaces=1 dist=5
+  [UPDATE] pos=(2,2) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(1,2) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=4 dist=5
+  [UPDATE] pos=(2,2) goldFaces=3 dist=5
+  [UPDATE] pos=(1,3) goldFaces=3 dist=5
+  [UPDATE] pos=(1,1) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=5
+  [UPDATE] pos=(2,0) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=1 dist=5
+  [UPDATE] pos=(3,3) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=2 dist=5
+  [UPDATE] pos=(2,2) goldFaces=2 dist=5
+  [UPDATE] pos=(2,0) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(3,2) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=1 dist=5
+  [UPDATE] pos=(3,3) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=3 dist=5
+  [UPDATE] pos=(0,0) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(3,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(2,0) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(3,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=1 dist=5
+[EXPAND] dist=4 pos=(2,3) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=0 dist=5
+  [UPDATE] pos=(2,2) goldFaces=0 dist=5
+[EXPAND] dist=4 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=5
+  [UPDATE] pos=(2,0) goldFaces=3 dist=5
+  [UPDATE] pos=(1,1) goldFaces=2 dist=5
+[EXPAND] dist=4 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=5
+  [UPDATE] pos=(2,0) goldFaces=2 dist=5
+  [UPDATE] pos=(1,1) goldFaces=3 dist=5
+[EXPAND] dist=4 pos=(1,2) goldFaces=4
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=5 dist=5
+  [UPDATE] pos=(2,2) goldFaces=4 dist=5
+  [UPDATE] pos=(1,3) goldFaces=4 dist=5
+  [UPDATE] pos=(1,1) goldFaces=4 dist=5
+[EXPAND] dist=4 pos=(2,3) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=0 dist=5
+  [UPDATE] pos=(3,3) goldFaces=0 dist=5
+[EXPAND] dist=4 pos=(2,1) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=3 dist=5
+  [UPDATE] pos=(2,2) goldFaces=3 dist=5
+  [UPDATE] pos=(2,0) goldFaces=3 dist=5
+[EXPAND] dist=5 pos=(3,3) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(3,0) goldFaces=3 dist=6
+  [UPDATE] pos=(2,1) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+  [UPDATE] pos=(3,0) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+  [UPDATE] pos=(3,0) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(3,2) goldFaces=3 dist=6
+  [UPDATE] pos=(2,3) goldFaces=3 dist=6
+  [UPDATE] pos=(2,1) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(3,3) goldFaces=0
+  vecinos=2
+  [UPDATE] pos=(3,2) goldFaces=0 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(1,0) goldFaces=3 dist=6
+  [UPDATE] pos=(3,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=4
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=4 dist=6
+  [UPDATE] pos=(0,3) goldFaces=5 dist=6
+  [UPDATE] pos=(0,1) goldFaces=4 dist=6
+[EXPAND] dist=5 pos=(0,0) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(1,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+  [UPDATE] pos=(3,0) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+  [UPDATE] pos=(1,2) goldFaces=3 dist=6
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+  [UPDATE] pos=(3,2) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=2 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,2) goldFaces=2 dist=6
+  [UPDATE] pos=(2,3) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(3,3) goldFaces=0
+  vecinos=2
+  [UPDATE] pos=(2,3) goldFaces=0 dist=6
+[EXPAND] dist=5 pos=(3,3) goldFaces=0
+  vecinos=2
+  [UPDATE] pos=(3,2) goldFaces=0 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+  [UPDATE] pos=(1,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(0,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(1,0) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+  [UPDATE] pos=(1,2) goldFaces=3 dist=6
+  [UPDATE] pos=(1,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=3 dist=6
+  [UPDATE] pos=(2,1) goldFaces=3 dist=6
+  [UPDATE] pos=(1,2) goldFaces=3 dist=6
+  [UPDATE] pos=(1,0) goldFaces=4 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=1 dist=6
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(1,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+  [UPDATE] pos=(3,0) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+  [UPDATE] pos=(3,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(3,2) goldFaces=0 dist=6
+  [UPDATE] pos=(3,0) goldFaces=0 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=1 dist=6
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+  [UPDATE] pos=(3,0) goldFaces=1 dist=6
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=2 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(2,1) goldFaces=0 dist=6
+  [UPDATE] pos=(3,0) goldFaces=0 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+  [UPDATE] pos=(3,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=4
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=4 dist=6
+  [UPDATE] pos=(2,1) goldFaces=4 dist=6
+  [UPDATE] pos=(1,0) goldFaces=4 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+  [UPDATE] pos=(2,3) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(1,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,2) goldFaces=2 dist=6
+  [UPDATE] pos=(2,3) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=3 dist=6
+  [UPDATE] pos=(0,3) goldFaces=4 dist=6
+  [UPDATE] pos=(0,1) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=3 dist=6
+  [UPDATE] pos=(2,1) goldFaces=3 dist=6
+  [UPDATE] pos=(1,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(3,3) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=2 dist=6
+  [UPDATE] pos=(2,3) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,2) goldFaces=2 dist=6
+  [UPDATE] pos=(2,3) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,0) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=3 dist=6
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=3 dist=6
+  [UPDATE] pos=(3,2) goldFaces=3 dist=6
+  [UPDATE] pos=(2,3) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(3,2) goldFaces=3 dist=6
+  [UPDATE] pos=(3,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=1 dist=6
+  [UPDATE] pos=(1,2) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(3,3) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=3 dist=6
+  [UPDATE] pos=(2,1) goldFaces=3 dist=6
+  [UPDATE] pos=(1,2) goldFaces=4 dist=6
+  [UPDATE] pos=(1,0) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=1 dist=6
+  [UPDATE] pos=(1,2) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=4
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=5 dist=6
+  [UPDATE] pos=(2,3) goldFaces=4 dist=6
+[EXPAND] dist=5 pos=(3,3) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=4
+  vecinos=4
+  [UPDATE] pos=(3,2) goldFaces=4 dist=6
+  [UPDATE] pos=(2,3) goldFaces=4 dist=6
+  [UPDATE] pos=(2,1) goldFaces=4 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=5
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=5 dist=6
+  [UPDATE] pos=(0,3) goldFaces=6 dist=6
+  [UPDATE] pos=(0,1) goldFaces=5 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(0,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,0) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(0,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,2) goldFaces=2 dist=6
+  [UPDATE] pos=(3,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(3,0) goldFaces=3 dist=6
+  [UPDATE] pos=(2,1) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(0,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+  [UPDATE] pos=(1,2) goldFaces=3 dist=6
+  [UPDATE] pos=(1,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=3 dist=6
+  [UPDATE] pos=(0,3) goldFaces=4 dist=6
+  [UPDATE] pos=(0,1) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=1 dist=6
+  [UPDATE] pos=(1,2) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(1,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+  [UPDATE] pos=(2,1) goldFaces=2 dist=6
+  [UPDATE] pos=(1,2) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+  [UPDATE] pos=(3,2) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(0,0) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(0,1) goldFaces=3 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=1 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(3,2) goldFaces=2 dist=6
+  [UPDATE] pos=(2,3) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(0,2) goldFaces=4
+  vecinos=3
+  [UPDATE] pos=(1,2) goldFaces=4 dist=6
+  [UPDATE] pos=(0,3) goldFaces=4 dist=6
+  [UPDATE] pos=(0,1) goldFaces=4 dist=6
+[EXPAND] dist=5 pos=(3,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,2) goldFaces=2 dist=6
+  [UPDATE] pos=(3,0) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=0
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=1 dist=6
+  [UPDATE] pos=(3,2) goldFaces=0 dist=6
+  [UPDATE] pos=(2,1) goldFaces=0 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=2 dist=6
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(2,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,2) goldFaces=2 dist=6
+  [UPDATE] pos=(2,3) goldFaces=1 dist=6
+  [UPDATE] pos=(2,1) goldFaces=1 dist=6
+[EXPAND] dist=5 pos=(0,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(0,1) goldFaces=2 dist=6
+[EXPAND] dist=5 pos=(1,3) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,3) goldFaces=4 dist=6
+  [UPDATE] pos=(2,3) goldFaces=3 dist=6
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(2,0) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=1 dist=7
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=3 dist=7
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+  [UPDATE] pos=(3,1) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=0 dist=7
+  [UPDATE] pos=(3,1) goldFaces=0 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+  [UPDATE] pos=(0,0) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+  [UPDATE] pos=(3,1) goldFaces=3 dist=7
+  [UPDATE] pos=(2,0) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=0 dist=7
+  [UPDATE] pos=(3,3) goldFaces=0 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=4
+  vecinos=3
+  [UPDATE] pos=(1,1) goldFaces=4 dist=7
+  [UPDATE] pos=(0,0) goldFaces=4 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(2,0) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(2,0) goldFaces=3 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(1,1) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(3,3) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(3,3) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=0 dist=7
+  [UPDATE] pos=(2,2) goldFaces=0 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=3 dist=7
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=0
+  vecinos=2
+  [UPDATE] pos=(2,0) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=3 dist=7
+  [UPDATE] pos=(2,0) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(0,0) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=4 dist=7
+  [UPDATE] pos=(2,2) goldFaces=3 dist=7
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=0 dist=7
+  [UPDATE] pos=(3,1) goldFaces=0 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=3 dist=7
+  [UPDATE] pos=(2,0) goldFaces=4 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=3 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=4
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=4 dist=7
+  [UPDATE] pos=(2,0) goldFaces=4 dist=7
+  [UPDATE] pos=(1,1) goldFaces=4 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=2 dist=7
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=3 dist=7
+  [UPDATE] pos=(2,0) goldFaces=4 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=4
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=4 dist=7
+  [UPDATE] pos=(0,2) goldFaces=4 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=1 dist=7
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=4
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=4 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(3,1) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=0
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=0 dist=7
+  [UPDATE] pos=(3,1) goldFaces=0 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=4 dist=7
+  [UPDATE] pos=(2,2) goldFaces=3 dist=7
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(3,3) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=4
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=4 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=4
+  vecinos=4
+  [UPDATE] pos=(2,2) goldFaces=4 dist=7
+  [UPDATE] pos=(1,3) goldFaces=4 dist=7
+  [UPDATE] pos=(1,1) goldFaces=4 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=0
+  vecinos=2
+  [UPDATE] pos=(2,0) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=2 dist=7
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=5
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=5 dist=7
+  [UPDATE] pos=(0,2) goldFaces=5 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=1
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(3,3) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+  [UPDATE] pos=(2,0) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=4
+  vecinos=4
+  [UPDATE] pos=(2,2) goldFaces=4 dist=7
+  [UPDATE] pos=(1,3) goldFaces=4 dist=7
+  [UPDATE] pos=(1,1) goldFaces=4 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=1
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=1 dist=7
+  [UPDATE] pos=(0,2) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=3 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=3 dist=7
+  [UPDATE] pos=(2,0) goldFaces=4 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=4
+  vecinos=2
+  [UPDATE] pos=(1,3) goldFaces=4 dist=7
+  [UPDATE] pos=(0,2) goldFaces=4 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(2,2) goldFaces=3 dist=7
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+  [UPDATE] pos=(3,3) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=3
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=4 dist=7
+  [UPDATE] pos=(2,2) goldFaces=3 dist=7
+  [UPDATE] pos=(1,3) goldFaces=3 dist=7
+  [UPDATE] pos=(1,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(0,1) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=3
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=3 dist=7
+  [UPDATE] pos=(3,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=3
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(3,2) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(3,3) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,0) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(0,0) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(3,0) goldFaces=2
+  vecinos=2
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(1,2) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(0,2) goldFaces=3 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(1,3) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=1
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=1 dist=7
+  [UPDATE] pos=(2,0) goldFaces=1 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(1,1) goldFaces=2 dist=7
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=3 dist=7
+[EXPAND] dist=6 pos=(2,3) goldFaces=2
+  vecinos=3
+  [UPDATE] pos=(3,3) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(2,1) goldFaces=2
+  vecinos=4
+  [UPDATE] pos=(3,1) goldFaces=2 dist=7
+  [UPDATE] pos=(2,2) goldFaces=2 dist=7
+  [UPDATE] pos=(2,0) goldFaces=2 dist=7
+[EXPAND] dist=6 pos=(0,3) goldFaces=6
+[GOAL] dist=6
+===========================================
+[PASS] test6c: debug en grilla solvable no crashea
+[PASS] test6d: debug y no-debug dan el mismo resultado
+
+===========================================
+  Resultado: 13 passed, 0 failed
+===========================================

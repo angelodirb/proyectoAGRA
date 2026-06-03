@@ -6,98 +6,89 @@
 #include "Transition.h"
 
 // ============================================================
-// findGoldIndex
+// aplicarReglasOro  (funcion interna, no expuesta en el header)
+//
+// Centralizamos aqui el intercambio entre la cara inferior del
+// cubo y la celda destino. Leer bottomHadGold ANTES de mutar
+// garantiza deteccion exacta al instante fisico del intercambio.
+//
+//   CASO 1: celda con oro, cara inferior VACIA
+//     -> cara recoge oro (putGoldOnBottom), celda lo pierde
+//     -> retorna true  (recogioOro = true, costo B)
+//
+//   CASO 2: celda con oro, cara inferior CON ORO
+//     -> intercambio entre piezas identicas: sin efecto neto
+//     -> retorna false (costo A)
+//
+//   CASO 3: celda VACIA, cara inferior CON ORO
+//     -> cara deposita oro en celda (removeGoldFromBottom)
+//     -> retorna false (costo A)
+//
+//   CASO 4: ambos vacios — sin efecto
+//     -> retorna false (costo A)
 // ============================================================
-int findGoldIndex(int row, int col, const GoldCells& goldCells) {
-    for (int i = 0; i < 6; ++i) {
-        if (goldCells[i].first == row && goldCells[i].second == col)
-            return i;
-    }
-    return -1;
-}
+static bool aplicarReglasOro(State& newState, int row, int col, int cols) {
+    bool bottomHadGold = newState.cube.bottomHasGold();
 
-// ============================================================
-// applyGoldRules  (funcion interna, no expuesta en el header)
-//
-// Aplica las reglas de oro al llegar a la celda (row, col).
-// Modifica newState directamente (ya es una copia del original).
-//
-// Reglas:
-//   Si la celda destino NO tiene oro:
-//     -> no ocurre nada
-//
-//   Si la celda destino tiene oro:
-//     CASO 1: cara bottom sin oro
-//       -> cubo recoge el oro (putGoldOnBottom)
-//       -> celda pierde su oro (remainingGold[i] = false)
-//
-//     CASO 2: cara bottom ya tiene oro
-//       -> ocurre intercambio
-//       -> la cantidad total de oro no cambia
-//       -> el estado booleano no cambia (ambos siguen con oro)
-// ============================================================
-static void applyGoldRules(State& newState, int row, int col,
-                            const GoldCells& goldCells) {
-    int goldIdx = findGoldIndex(row, col, goldCells);
+    uint64_t mask     = 1ULL << (row * cols + col);
+    bool cellHasGold  = (newState.cellGold & mask) != 0;
 
-    if (goldIdx == -1)                         return;  // no es celda de oro
-    if (!newState.remainingGold[goldIdx])      return;  // celda ya recogida
-
-    // La celda destino tiene oro
-    if (!newState.cube.bottomHasGold()) {
-        // CASO 1: cara bottom sin oro -> el cubo recoge
+    if (cellHasGold && !bottomHadGold) {
+        // CASO 1: pickup real
         newState.cube.putGoldOnBottom();
-        newState.remainingGold[goldIdx] = false;
+        newState.cellGold &= ~mask;
+        return true;
     }
-    // CASO 2: cara bottom ya tiene oro -> intercambio
-    // El estado booleano no cambia: celda y cara siguen con oro.
-    // No se requiere ninguna accion adicional.
+    if (!cellHasGold && bottomHadGold) {
+        // CASO 3: la cara deposita oro en la celda vacia
+        newState.cube.removeGoldFromBottom();
+        newState.cellGold |= mask;
+        return false;
+    }
+    // CASO 2 o CASO 4: sin efecto observable
+    return false;
 }
 
 // ============================================================
 // moveNorth
-// El cubo avanza al norte: fila disminuye, rollNorth.
 // ============================================================
-State moveNorth(const State& state, const GoldCells& goldCells) {
-    State next = state;        // copia completa, el original no se toca
+TransitionResult moveNorth(const State& state, int cols) {
+    State next = state;
     next.row -= 1;
     next.cube.rollNorth();
-    applyGoldRules(next, next.row, next.col, goldCells);
-    return next;
+    bool recogio = aplicarReglasOro(next, next.row, next.col, cols);
+    return {next, recogio};
 }
 
 // ============================================================
 // moveSouth
-// El cubo avanza al sur: fila aumenta, rollSouth.
 // ============================================================
-State moveSouth(const State& state, const GoldCells& goldCells) {
+TransitionResult moveSouth(const State& state, int cols) {
     State next = state;
     next.row += 1;
     next.cube.rollSouth();
-    applyGoldRules(next, next.row, next.col, goldCells);
-    return next;
+    bool recogio = aplicarReglasOro(next, next.row, next.col, cols);
+    return {next, recogio};
 }
 
 // ============================================================
 // moveEast
-// El cubo avanza al este: columna aumenta, rollEast.
 // ============================================================
-State moveEast(const State& state, const GoldCells& goldCells) {
+TransitionResult moveEast(const State& state, int cols) {
     State next = state;
     next.col += 1;
     next.cube.rollEast();
-    applyGoldRules(next, next.row, next.col, goldCells);
-    return next;
+    bool recogio = aplicarReglasOro(next, next.row, next.col, cols);
+    return {next, recogio};
 }
 
 // ============================================================
 // moveWest
-// El cubo avanza al oeste: columna disminuye, rollWest.
 // ============================================================
-State moveWest(const State& state, const GoldCells& goldCells) {
+TransitionResult moveWest(const State& state, int cols) {
     State next = state;
     next.col -= 1;
     next.cube.rollWest();
-    applyGoldRules(next, next.row, next.col, goldCells);
-    return next;
+    bool recogio = aplicarReglasOro(next, next.row, next.col, cols);
+    return {next, recogio};
 }

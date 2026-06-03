@@ -8,7 +8,12 @@
 // Combina tres piezas de informacion:
 //   1. posicion del cubo en la grilla (row, col)
 //   2. estado del cubo: orientacion + oro por cara fisica
-//   3. cuales de las 6 celdas originales aun tienen oro
+//   3. distribucion actual del oro en celdas de la grilla (cellGold)
+//
+// Invariante de conservacion del oro (vale en todo instante):
+//   cube.countGoldFaces() + cellGoldCount() == 6
+//   El oro no se crea ni se destruye; solo circula entre celdas
+//   y caras del cubo a traves de los intercambios de Transition.
 //
 // Separacion de responsabilidades:
 //   Cube  -> orientacion, rotaciones, oro en caras fisicas
@@ -16,12 +21,10 @@
 //
 // Fuente de verdad del oro en caras fisicas:
 //   Siempre cube.faceHasGold(i). No hay campo espejo en State.
-//   Esto garantiza consistencia: no hay estado duplicado que
-//   pueda desincronizarse.
 // ============================================================
 
 #include "../cube/Cube.h"
-#include <array>
+#include <cstdint>
 #include <iostream>
 
 struct State {
@@ -45,15 +48,19 @@ struct State {
     Cube cube;
 
     // ----------------------------------------------------------
-    // Estado del oro en las 6 celdas originales de la grilla.
+    // Oro en celdas de la grilla.
     //
-    //   remainingGold[i] == true  =>  la celda i todavia tiene oro.
+    // Bitmask de 64 bits: el bit (row * cols + col) esta encendido
+    // si esa celda tiene oro actualmente.
     //
-    // El problema garantiza exactamente 6 celdas con oro.
-    // El indice 0..5 corresponde al orden de aparicion en la grilla
-    // (de arriba a abajo, de izquierda a derecha).
+    // Usamos bitmask en lugar de bool[6] porque CASO 3 permite
+    // depositar oro en cualquier celda, no solo en las 6 posiciones
+    // 'G' originales. Con bool[6] esos depositos serian irrepresentables.
+    //
+    // El ancho de la grilla (cols) se necesita para convertir
+    // (row, col) a indice y viceversa.
     // ----------------------------------------------------------
-    std::array<bool, 6> remainingGold;
+    uint64_t cellGold;
 
     // ----------------------------------------------------------
     // Constructor explicito.
@@ -64,18 +71,18 @@ struct State {
     // Parametros:
     //   row, col      : posicion del cubo en la grilla
     //   cube          : cubo con su orientacion y oro ya asignado
-    //   remainingGold : cuales celdas originales tienen oro aun
+    //   cellGold      : bitmask de celdas que tienen oro actualmente
     // ----------------------------------------------------------
     State(int row, int col,
           const Cube& cube,
-          const std::array<bool, 6>& remainingGold);
+          uint64_t cellGold);
 
     // ----------------------------------------------------------
     // Helpers de estado global
     // ----------------------------------------------------------
 
-    // Cuantas de las 6 celdas originales todavia tienen oro.
-    int remainingGoldCount() const;
+    // Cuantas celdas de la grilla tienen oro actualmente.
+    int cellGoldCount() const;
 
     // El objetivo del problema: las 6 caras fisicas del cubo
     // tienen oro simultaneamente (cube.countGoldFaces() == 6).
@@ -95,7 +102,7 @@ struct State {
     //   - posicion (row, col)
     //   - orientacion del cubo (todas las 6 caras)
     //   - oro en caras fisicas (cube.faceHasGold para i = 0..5)
-    //   - oro restante en celdas (remainingGold)
+    //   - oro en celdas (cellGold)
     //
     // Necesario para el conjunto de estados visitados en Dijkstra.
     // ----------------------------------------------------------

@@ -8,7 +8,8 @@
 //
 // Responsabilidad de este modulo:
 //   Dado un State actual, producir el State resultante de
-//   aplicar un movimiento valido (norte / sur / este / oeste).
+//   aplicar un movimiento valido (norte / sur / este / oeste),
+//   junto con metadata fisica del evento de oro ocurrido.
 //
 // Lo que NO hace este modulo:
 //   - No verifica limites de la grilla (eso es del solver)
@@ -18,8 +19,9 @@
 // Separacion de responsabilidades:
 //   Cube        -> orientacion + oro fisico
 //   State       -> snapshot del estado global
-//   Transition  -> reglas de movimiento y de oro
-//   Solver      -> busqueda (todavia no implementado)
+//   Transition  -> reglas de movimiento y eventos fisicos de oro
+//   Cost        -> traduccion evento -> costo
+//   Solver      -> busqueda
 // ============================================================
 
 #include "../state/State.h"
@@ -29,26 +31,36 @@
 // ------------------------------------------------------------
 // GoldCells
 //
-// Las 6 posiciones (row, col) donde habia oro originalmente
-// en la grilla. El indice coincide con el de State::remainingGold.
-//
-//   goldCells[i] = {row, col} de la celda de oro i.
-//
-// Se pasa como parametro a las funciones de movimiento para
-// que puedan saber si la celda destino es una celda de oro.
+// Las 6 posiciones (row, col) originales con oro.
+// Sigue siendo usada por Grid para inicializar el bitmask
+// de oro de la grilla (cellGold en State).
 // ------------------------------------------------------------
 using GoldCells = std::array<std::pair<int,int>, 6>;
 
 // ------------------------------------------------------------
-// findGoldIndex
+// TransitionResult
 //
-// Busca si (row, col) es alguna de las 6 celdas de oro.
-// Retorna el indice (0..5) si lo es, o -1 si no lo es.
+// Resultado de aplicar un movimiento: nuevo estado + metadata
+// fisica del evento de oro que ocurrio (si ocurrio alguno).
 //
-// Usado internamente por las funciones de movimiento para
-// determinar si hay interaccion de oro en la celda destino.
+// recogioOro == true  =>  CASO 1 (pickup):
+//   celda tiene oro, cara inferior vacia.
+//   El cubo recoge el oro de la celda. Costo: B.
+//
+// recogioOro == false =>  CASO 2, CASO 3 o CASO 4:
+//   CASO 2: ambos tienen oro (sin efecto neto). Costo: A.
+//   CASO 3: cara inferior con oro, celda vacia. El cubo
+//     deposita su oro en la celda. Costo: A.
+//   CASO 4: ambos vacios. Sin efecto. Costo: A.
+//
+// La deteccion ocurre en aplicarReglasOro, antes de cualquier
+// mutacion, con acceso al estado fisico completo.
 // ------------------------------------------------------------
-int findGoldIndex(int row, int col, const GoldCells& goldCells);
+struct TransitionResult {
+    State nextState;
+    bool  recogioOro;
+};
+
 
 // ============================================================
 // Funciones de movimiento individuales
@@ -58,7 +70,7 @@ int findGoldIndex(int row, int col, const GoldCells& goldCells);
 //   2. Actualiza row/col segun la direccion
 //   3. Rota el cubo en la direccion indicada
 //   4. Aplica las reglas de oro en la celda destino
-//   5. Retorna el nuevo state
+//   5. Retorna TransitionResult con el nuevo state y el evento
 //
 // PRECONDICION: el movimiento es valido (dentro de la grilla).
 // La validacion de limites es responsabilidad del solver.
@@ -69,15 +81,15 @@ int findGoldIndex(int row, int col, const GoldCells& goldCells);
 // ============================================================
 
 // El cubo avanza hacia el norte: row -= 1, rollNorth()
-State moveNorth(const State& state, const GoldCells& goldCells);
+TransitionResult moveNorth(const State& state, int cols);
 
 // El cubo avanza hacia el sur: row += 1, rollSouth()
-State moveSouth(const State& state, const GoldCells& goldCells);
+TransitionResult moveSouth(const State& state, int cols);
 
 // El cubo avanza hacia el este: col += 1, rollEast()
-State moveEast(const State& state, const GoldCells& goldCells);
+TransitionResult moveEast(const State& state, int cols);
 
 // El cubo avanza hacia el oeste: col -= 1, rollWest()
-State moveWest(const State& state, const GoldCells& goldCells);
+TransitionResult moveWest(const State& state, int cols);
 
 #endif // TRANSITION_H

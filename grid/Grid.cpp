@@ -113,33 +113,30 @@ void Grid::printGrid() const {
 }
 
 // ============================================================
-// generateNextStates
+// generateTransitions
 //
 // Capa de coordinacion: consulta Grid para legalidad,
 // delega la fisica en las funciones de Transition.
+// Propaga TransitionResult completo (estado + evento de oro).
 // ============================================================
-std::vector<State> generateNextStates(
+std::vector<TransitionResult> generateTransitions(
     const State& current,
     const Grid&  grid)
 {
-    std::vector<State> result;
-    const GoldCells goldCells = grid.getGoldCells();
+    std::vector<TransitionResult> transiciones;
+    const int cols = grid.cols();
 
-    // Norte: row - 1
     if (grid.isValidMove(current.row - 1, current.col))
-        result.push_back(moveNorth(current, goldCells));
+        transiciones.push_back(moveNorth(current, cols));
 
-    // Sur: row + 1
     if (grid.isValidMove(current.row + 1, current.col))
-        result.push_back(moveSouth(current, goldCells));
+        transiciones.push_back(moveSouth(current, cols));
 
-    // Este: col + 1
     if (grid.isValidMove(current.row, current.col + 1))
-        result.push_back(moveEast(current, goldCells));
+        transiciones.push_back(moveEast(current, cols));
 
-    // Oeste: col - 1
     if (grid.isValidMove(current.row, current.col - 1))
-        result.push_back(moveWest(current, goldCells));
+        transiciones.push_back(moveWest(current, cols));
 
-    return result;
+    return transiciones;
 }

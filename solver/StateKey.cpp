@@ -18,7 +18,7 @@ StateKey::StateKey(const State& state)
       south (state.cube.getSouth()),
       east  (state.cube.getEast()),
       west  (state.cube.getWest()),
-      remainingGold(state.remainingGold)
+      cellGold(state.cellGold)
 {
     for (int i = 0; i < 6; ++i)
         cubeGold[i] = state.cube.faceHasGold(i);
@@ -46,9 +46,8 @@ bool StateKey::operator<(const StateKey& other) const {
     // Oro en caras fisicas (std::array soporta operator<)
     if (cubeGold != other.cubeGold) return cubeGold < other.cubeGold;
 
-    // Oro restante en celdas
-    if (remainingGold != other.remainingGold)
-        return remainingGold < other.remainingGold;
+    // Oro en celdas de la grilla
+    if (cellGold != other.cellGold) return cellGold < other.cellGold;
 
     return false;  // iguales -> no es menor
 }
@@ -65,8 +64,8 @@ bool StateKey::operator==(const StateKey& other) const {
         && south  == other.south
         && east   == other.east
         && west   == other.west
-        && cubeGold      == other.cubeGold
-        && remainingGold == other.remainingGold;
+        && cubeGold  == other.cubeGold
+        && cellGold  == other.cellGold;
 }
 
 bool StateKey::operator!=(const StateKey& other) const {
@@ -98,11 +97,8 @@ void StateKey::printKey() const {
                   << (cubeGold[i] ? "[ORO]" : "vacia") << "\n";
     }
 
-    std::cout << "\nOro en celdas originales:\n";
-    for (int i = 0; i < 6; ++i) {
-        std::cout << "  celda " << i << " : "
-                  << (remainingGold[i] ? "tiene oro" : "recogido") << "\n";
-    }
+    std::cout << "\nOro en celdas (bitmask): 0x"
+              << std::hex << cellGold << std::dec << "\n";
 
     std::cout << "===========================\n";
 }

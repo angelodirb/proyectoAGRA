@@ -11,7 +11,6 @@
 
 #include <iostream>
 #include <string>
-#include <array>
 #include <map>
 #include "../solver/StateKey.h"
 
@@ -35,15 +34,15 @@ void reportTest(const std::string& name, bool passed) {
 // Helpers de construccion
 // ------------------------------------------------------------
 
-// Cubo estandar: top=0, bottom=1, north=2, south=3, east=4, west=5
 Cube makeFreshCube() {
     return Cube(0, 1, 2, 3, 4, 5);
 }
 
-// State con todas las celdas de oro presentes y cubo fresco.
+// State base: posicion (2,3), cubo fresco, 6 bits encendidos (ALL6).
+static constexpr uint64_t ALL6 = 0x3FULL;
+
 State makeBaseState() {
-    std::array<bool,6> allGold = {true, true, true, true, true, true};
-    return State(2, 3, makeFreshCube(), allGold);
+    return State(2, 3, makeFreshCube(), ALL6);
 }
 
 // ============================================================
@@ -51,18 +50,13 @@ State makeBaseState() {
 //
 // Verifica que todos los campos del StateKey coincidan
 // exactamente con los del State de origen.
-//
-// State usado:
-//   row=2, col=3
-//   Cube(0,1,2,3,4,5): top=0, bottom=1, north=2, south=3, east=4, west=5
-//   cubeGold: ningun oro (fresh cube)
-//   remainingGold: {true,false,true,false,true,false}
 // ============================================================
 void test1_construccion() {
     std::cout << "--- TEST 1: Construccion correcta desde State ---\n";
 
-    std::array<bool,6> rg = {true, false, true, false, true, false};
-    State s(2, 3, Cube(0, 1, 2, 3, 4, 5), rg);
+    // bits 0, 2, 4 encendidos: patron alternado
+    uint64_t cellGoldPattern = (1ULL<<0) | (1ULL<<2) | (1ULL<<4);
+    State s(2, 3, Cube(0, 1, 2, 3, 4, 5), cellGoldPattern);
     StateKey k(s);
 
     // Posicion
@@ -81,18 +75,17 @@ void test1_construccion() {
     bool allCubeFacesEmpty = true;
     for (int i = 0; i < 6; ++i)
         if (k.cubeGold[i]) { allCubeFacesEmpty = false; break; }
-    reportTest("test1i: cubeGold todo false (sin oro)",  allCubeFacesEmpty);
+    reportTest("test1i: cubeGold todo false (cubo sin oro)",  allCubeFacesEmpty);
 
-    // Oro en celdas
-    reportTest("test1j: remainingGold[0] == true",  k.remainingGold[0] == true);
-    reportTest("test1k: remainingGold[1] == false", k.remainingGold[1] == false);
+    // Oro en celdas: bitmask copiado exactamente
+    reportTest("test1j: cellGold bit 0 encendido",  (k.cellGold & (1ULL<<0)) != 0);
+    reportTest("test1k: cellGold bit 1 apagado",    (k.cellGold & (1ULL<<1)) == 0);
+    reportTest("test1l: cellGold bit 2 encendido",  (k.cellGold & (1ULL<<2)) != 0);
+    reportTest("test1m: cellGold coincide con State", k.cellGold == s.cellGold);
 }
 
 // ============================================================
 // TEST 2 - Mismo State produce mismo StateKey
-//
-// Dos States construidos identicamente deben producir
-// StateKeys iguales. Garantia de determinismo.
 // ============================================================
 void test2_mismosEstados() {
     std::cout << "\n--- TEST 2: Mismo State -> mismo StateKey ---\n";
@@ -103,114 +96,100 @@ void test2_mismosEstados() {
     StateKey k1(s1);
     StateKey k2(s2);
 
-    reportTest("test2a: k1 == k2  (operator==)",   k1 == k2);
-    reportTest("test2b: !(k1 < k2) (operator<)",  !(k1 < k2));
-    reportTest("test2c: !(k2 < k1) (operator<)",  !(k2 < k1));
+    reportTest("test2a: k1 == k2  (operator==)",  k1 == k2);
+    reportTest("test2b: !(k1 < k2) (operator<)", !(k1 < k2));
+    reportTest("test2c: !(k2 < k1) (operator<)", !(k2 < k1));
 }
 
 // ============================================================
 // TEST 3 - Diferente posicion -> distinto StateKey
-//
-// Un cambio en row o col debe distinguir los states.
-// El orden lexicografico de row es correcto.
 // ============================================================
 void test3_diferentePosicion() {
     std::cout << "\n--- TEST 3: Diferente posicion -> distinto StateKey ---\n";
 
-    std::array<bool,6> allGold = {true,true,true,true,true,true};
+    StateKey kA(State(1, 0, makeFreshCube(), ALL6));  // row=1
+    StateKey kB(State(2, 0, makeFreshCube(), ALL6));  // row=2
+    StateKey kC(State(1, 1, makeFreshCube(), ALL6));  // row=1, col=1
 
-    StateKey kA(State(1, 0, makeFreshCube(), allGold));  // row=1
-    StateKey kB(State(2, 0, makeFreshCube(), allGold));  // row=2
-    StateKey kC(State(1, 1, makeFreshCube(), allGold));  // row=1, col=1
-
-    reportTest("test3a: diferente row -> k != k",  kA != kB);
-    reportTest("test3b: diferente col -> k != k",  kA != kC);
-    reportTest("test3c: row=1 < row=2 (orden correcto)", kA < kB && !(kB < kA));
+    reportTest("test3a: diferente row -> keys distintas",  kA != kB);
+    reportTest("test3b: diferente col -> keys distintas",  kA != kC);
+    reportTest("test3c: row=1 < row=2 (orden correcto)",   kA < kB && !(kB < kA));
 }
 
 // ============================================================
-// TEST 4 - Diferente orientacion del cubo -> distinto StateKey
-//
-// Cubo base: Cube(0,1,2,3,4,5)
-// Cubo rotado (rollNorth):
-//   top=3, bottom=2, north=0, south=1, east=4, west=5
+// TEST 4 - Diferente orientacion -> distinto StateKey
 // ============================================================
 void test4_diferenteOrientacion() {
     std::cout << "\n--- TEST 4: Diferente orientacion -> distinto StateKey ---\n";
 
-    std::array<bool,6> allGold = {true,true,true,true,true,true};
-
     Cube rotated = makeFreshCube();
     rotated.rollNorth();  // top=3, bottom=2, north=0, south=1, east=4, west=5
 
-    StateKey kBase(State(0, 0, makeFreshCube(), allGold));
-    StateKey kRot (State(0, 0, rotated,         allGold));
+    StateKey kBase(State(0, 0, makeFreshCube(), ALL6));
+    StateKey kRot (State(0, 0, rotated,         ALL6));
 
-    reportTest("test4a: orientacion diferente -> k != k",  kBase != kRot);
-    reportTest("test4b: top difiere  (0 != 3)",  kBase.top    != kRot.top);
-    reportTest("test4c: bottom difiere (1 != 2)", kBase.bottom != kRot.bottom);
+    reportTest("test4a: orientacion diferente -> keys distintas",  kBase != kRot);
+    reportTest("test4b: top difiere  (0 != 3)",    kBase.top    != kRot.top);
+    reportTest("test4c: bottom difiere (1 != 2)",  kBase.bottom != kRot.bottom);
 }
 
 // ============================================================
 // TEST 5 - Diferente oro en cubo -> distinto StateKey
-//
-// Cubo base: sin oro.
-// Cubo con oro: putGoldOnBottom() -> cara 1 (bottom inicial) tiene oro.
 // ============================================================
 void test5_diferenteOroCubo() {
     std::cout << "\n--- TEST 5: Diferente oro en cubo -> distinto StateKey ---\n";
 
-    std::array<bool,6> allGold = {true,true,true,true,true,true};
-
     Cube cWithGold = makeFreshCube();
     cWithGold.putGoldOnBottom();  // cara 1 recibe oro
 
-    StateKey kNoGold  (State(0, 0, makeFreshCube(), allGold));
-    StateKey kWithGold(State(0, 0, cWithGold,       allGold));
+    StateKey kNoGold  (State(0, 0, makeFreshCube(), ALL6));
+    StateKey kWithGold(State(0, 0, cWithGold,       ALL6));
 
-    reportTest("test5a: cubeGold diferente -> k != k",       kNoGold != kWithGold);
-    reportTest("test5b: kWithGold.cubeGold[1] == true",       kWithGold.cubeGold[1]);
-    reportTest("test5c: kNoGold.cubeGold[1]   == false",     !kNoGold.cubeGold[1]);
+    reportTest("test5a: cubeGold diferente -> keys distintas",     kNoGold != kWithGold);
+    reportTest("test5b: kWithGold.cubeGold[1] == true",             kWithGold.cubeGold[1]);
+    reportTest("test5c: kNoGold.cubeGold[1]   == false",           !kNoGold.cubeGold[1]);
 }
 
 // ============================================================
-// TEST 6 - Diferente remainingGold -> distinto StateKey
+// TEST 6 - Diferente cellGold -> distinto StateKey
 //
-// Mismo cubo, misma posicion, pero celdas de oro distintas.
+// Mismo cubo, misma posicion, pero bitmasks de celda distintos.
 // ============================================================
-void test6_diferenteRemainingGold() {
-    std::cout << "\n--- TEST 6: Diferente remainingGold -> distinto StateKey ---\n";
+void test6_diferenteCellGold() {
+    std::cout << "\n--- TEST 6: Diferente cellGold -> distinto StateKey ---\n";
 
     Cube c = makeFreshCube();
-    std::array<bool,6> allGold  = {true,  true, true, true, true, true};
-    std::array<bool,6> oneMiss  = {false, true, true, true, true, true};
+    uint64_t cellGoldAll  = 0x3FULL;  // bits 0-5 encendidos
+    uint64_t cellGoldMiss = 0x3EULL;  // bit 0 apagado
 
-    StateKey kAll (State(0, 0, c, allGold));
-    StateKey kMiss(State(0, 0, c, oneMiss));
+    StateKey kAll (State(0, 0, c, cellGoldAll));
+    StateKey kMiss(State(0, 0, c, cellGoldMiss));
 
-    reportTest("test6a: remainingGold diferente -> k != k",  kAll != kMiss);
-    reportTest("test6b: kAll.remainingGold[0]=true, kMiss[0]=false",
-               kAll.remainingGold[0] && !kMiss.remainingGold[0]);
+    reportTest("test6a: cellGold diferente -> keys distintas",
+               kAll != kMiss);
+    reportTest("test6b: kAll tiene bit 0 encendido",
+               (kAll.cellGold & 1ULL) != 0);
+    reportTest("test6c: kMiss tiene bit 0 apagado",
+               (kMiss.cellGold & 1ULL) == 0);
+    reportTest("test6d: kAll.cellGold == 0x3F",
+               kAll.cellGold == 0x3FULL);
+    reportTest("test6e: kMiss.cellGold == 0x3E",
+               kMiss.cellGold == 0x3EULL);
 }
 
 // ============================================================
 // TEST 7 - operator< es un orden total estricto
 //
-// Verifica las tres propiedades fundamentales:
-//   - Irreflexividad : !(k < k)
-//   - Asimetria      : k1 < k2 => !(k2 < k1)
-//   - Transitividad  : k1 < k2 && k2 < k3 => k1 < k3
-//
-// Usando tres estados con rows 1, 2, 3.
+// - Irreflexividad : !(k < k)
+// - Asimetria      : k1 < k2 => !(k2 < k1)
+// - Transitividad  : k1 < k2 && k2 < k3 => k1 < k3
 // ============================================================
 void test7_ordenTotalEstricto() {
     std::cout << "\n--- TEST 7: operator< es orden total estricto ---\n";
 
-    std::array<bool,6> allGold = {true,true,true,true,true,true};
-
-    StateKey k1(State(1, 0, makeFreshCube(), allGold));
-    StateKey k2(State(2, 0, makeFreshCube(), allGold));
-    StateKey k3(State(3, 0, makeFreshCube(), allGold));
+    StateKey k1(State(1, 0, makeFreshCube(), ALL6));
+    StateKey k2(State(2, 0, makeFreshCube(), ALL6));
+    StateKey k3(State(3, 0, makeFreshCube(), ALL6));
 
     reportTest("test7a: irreflexividad !(k1 < k1)",  !(k1 < k1));
     reportTest("test7b: k1 < k2",                     k1 < k2);
@@ -221,22 +200,13 @@ void test7_ordenTotalEstricto() {
 
 // ============================================================
 // TEST 8 - std::map<StateKey, int> funciona correctamente
-//
-// Verifica que StateKey puede usarse como clave de std::map:
-//   - Insercion correcta
-//   - Lookup por clave
-//   - Sin colisiones entre claves distintas
-//   - Sobreescritura de valor
-//   - Copia del mismo State produce la misma clave (lookup exitoso)
 // ============================================================
 void test8_stdMap() {
     std::cout << "\n--- TEST 8: std::map<StateKey, int> ---\n";
 
-    std::array<bool,6> allGold = {true,true,true,true,true,true};
-
-    State s1(0, 0, makeFreshCube(), allGold);
-    State s2(1, 0, makeFreshCube(), allGold);
-    State s3(2, 0, makeFreshCube(), allGold);
+    State s1(0, 0, makeFreshCube(), ALL6);
+    State s2(1, 0, makeFreshCube(), ALL6);
+    State s3(2, 0, makeFreshCube(), ALL6);
 
     std::map<StateKey, int> dist;
     dist[StateKey(s1)] = 10;
@@ -255,38 +225,78 @@ void test8_stdMap() {
     reportTest("test8d: sobreescritura de s1 -> 99",
                dist[StateKey(s1)] == 99);
 
-    // Copia del mismo State debe indexar la misma clave
+    // Copia del mismo State indexa la misma clave
     State s1_copy = s1;
     reportTest("test8e: copia de s1 tiene la misma clave",
                dist.count(StateKey(s1_copy)) == 1);
 }
 
 // ============================================================
-// TEST 9 - printKey() no causa crashes
+// TEST 9 - Igualdad y desigualdad: cellGold distingue estados
 //
-// Verifica que printKey() ejecuta sin errores para distintas
-// configuraciones: sin oro, con oro en caras y en celdas.
+// Verifica que cellGold forme parte correcta del criterio de
+// identidad en StateKey: mismo cubo, misma posicion, distinto
+// bitmask => keys distintas.
 // ============================================================
-void test9_printKey() {
-    std::cout << "\n--- TEST 9: printKey ---\n";
+void test9_cellGoldDistingue() {
+    std::cout << "\n--- TEST 9: cellGold distingue states correctamente ---\n";
 
-    // Estado fresco: sin oro en ninguna cara
-    std::cout << "\n[StateKey: estado inicial]\n";
+    Cube c = makeFreshCube();
+
+    StateKey kFull (State(0, 0, c, 0x3FULL));
+    StateKey kNone (State(0, 0, c, 0ULL));
+    StateKey kPart (State(0, 0, c, 0x1FULL));  // bits 0-4
+
+    // Distintos bitmasks -> distintas keys
+    reportTest("test9a: 0x3F != 0x00 -> keys distintas",   kFull != kNone);
+    reportTest("test9b: 0x3F != 0x1F -> keys distintas",   kFull != kPart);
+    reportTest("test9c: 0x1F != 0x00 -> keys distintas",   kPart != kNone);
+
+    // Mismo bitmask -> misma key
+    StateKey kFull2(State(0, 0, c, 0x3FULL));
+    reportTest("test9d: mismo 0x3F -> keys iguales",       kFull == kFull2);
+
+    // Verificar valores almacenados
+    reportTest("test9e: kFull.cellGold == 0x3F",   kFull.cellGold == 0x3FULL);
+    reportTest("test9f: kNone.cellGold == 0",       kNone.cellGold == 0ULL);
+    reportTest("test9g: kPart.cellGold == 0x1F",   kPart.cellGold == 0x1FULL);
+
+    // Diferencia por un solo bit
+    StateKey kA(State(0, 0, c, 0x3FULL));         // bit 0 encendido
+    StateKey kB(State(0, 0, c, 0x3FULL & ~1ULL)); // bit 0 apagado
+    reportTest("test9h: diferencia de 1 bit -> keys distintas", kA != kB);
+
+    // Mismas keys en std::map
+    std::map<StateKey, int> m;
+    m[kFull]  = 1;
+    m[kNone]  = 2;
+    m[kPart]  = 3;
+    m[kFull2] = 99;  // sobreescribe kFull (misma key)
+    reportTest("test9i: kFull2 sobreescribe kFull en mapa",
+               m[kFull] == 99 && m.size() == 3);
+}
+
+// ============================================================
+// TEST 10 - printKey() no causa crashes
+// ============================================================
+void test10_printKey() {
+    std::cout << "\n--- TEST 10: printKey ---\n";
+
+    std::cout << "\n[StateKey: estado inicial, todo gold]\n";
     StateKey(makeBaseState()).printKey();
 
-    // Estado con oro en cubo y algunas celdas recogidas
+    // Estado con oro en cubo y cellGold parcial
     Cube c = makeFreshCube();
     c.putGoldOnBottom();   // cara 1
     c.rollNorth();
     c.putGoldOnBottom();   // cara 2
-    std::array<bool,6> rg = {false, false, true, true, true, true};
-    State s(4, 1, c, rg);
+    State s(4, 1, c, (1ULL<<2)|(1ULL<<3)|(1ULL<<4)|(1ULL<<5));
 
-    std::cout << "\n[StateKey: 2 caras con oro, 2 celdas recogidas]\n";
+    std::cout << "\n[StateKey: 2 caras con oro, 4 celdas con oro]\n";
     StateKey(s).printKey();
 
-    reportTest("test9a: printKey sin oro ejecuto sin errores",  true);
-    reportTest("test9b: printKey con oro ejecuto sin errores",  true);
+    reportTest("test10a: printKey sin oro en cubo -> sin errores",  true);
+    reportTest("test10b: printKey con oro en cubo -> sin errores",  true);
 }
 
 // ============================================================
@@ -302,10 +312,11 @@ int main() {
     test3_diferentePosicion();
     test4_diferenteOrientacion();
     test5_diferenteOroCubo();
-    test6_diferenteRemainingGold();
+    test6_diferenteCellGold();
     test7_ordenTotalEstricto();
     test8_stdMap();
-    test9_printKey();
+    test9_cellGoldDistingue();
+    test10_printKey();
 
     std::cout << "\n===========================================\n";
     std::cout << "  Resultado: " << testsPassed << " passed, "

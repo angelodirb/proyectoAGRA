@@ -9,20 +9,19 @@
 //   Permitir que estados sean usados como clave en std::map y
 //   como elementos de un conjunto de visitados en Dijkstra.
 //
-// Separacion de State y StateKey:
-//   State    -> objeto rico: logica, debug, metodos de conveniencia
-//   StateKey -> dato puro: comparable, deterministico, sin logica
+// Separamos StateKey de State porque Dijkstra necesita un dato
+// puro, comparable y deterministico como clave del mapa de
+// distancias. State tiene metodos y logica de debug que no son
+// necesarios — ni deseados — en una clave de busqueda.
 //
 // Dos estados fisicamente equivalentes producen exactamente
-// el mismo StateKey. Esta propiedad garantiza correctitud en
-// la busqueda de estados.
-//
-// StateKey es conceptualmente inmutable: se construye una vez
-// desde un State y no se modifica.
+// el mismo StateKey. StateKey es conceptualmente inmutable:
+// se construye una vez desde un State y no se modifica.
 // ============================================================
 
 #include "../state/State.h"
 #include <array>
+#include <cstdint>
 #include <iostream>
 
 struct StateKey {
@@ -57,13 +56,11 @@ struct StateKey {
     std::array<bool, 6> cubeGold;
 
     // ----------------------------------------------------------
-    // Oro restante en las celdas originales de la grilla.
-    //
-    //   remainingGold[i] == true  =>  la celda i todavia tiene oro.
-    //
-    // Copia directa de State::remainingGold.
+    // Oro en celdas de la grilla.
+    // Bitmask: bit (row*cols+col) encendido si esa celda tiene oro.
+    // Copia directa de State::cellGold.
     // ----------------------------------------------------------
-    std::array<bool, 6> remainingGold;
+    uint64_t cellGold;
 
     // ----------------------------------------------------------
     // Constructor desde State.
@@ -82,7 +79,7 @@ struct StateKey {
     //   2. col
     //   3. top, bottom, north, south, east, west
     //   4. cubeGold
-    //   5. remainingGold
+    //   5. cellGold
     //
     // Garantiza orden total estricto: permite usar StateKey como
     // clave en std::map<StateKey, int>.

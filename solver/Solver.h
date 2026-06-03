@@ -12,7 +12,7 @@
 //
 // Lo que NO hace este modulo:
 //   - No rota cubos manualmente
-//   - No modifica remainingGold manualmente
+//   - No aplica reglas de oro ni modifica cellGold directamente
 //   - No conoce las reglas de oro
 //
 //   Toda la fisica esta en Cube, Transition y Grid.

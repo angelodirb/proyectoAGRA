@@ -18,7 +18,7 @@
 // Separacion de responsabilidades:
 //   Grid       -> legalidad de movimientos, estructura de la grilla
 //   Transition -> reglas fisicas del cubo y del oro
-//   Solver     -> busqueda (todavia no implementado)
+//   Solver     -> busqueda (Dijkstra)
 // ============================================================
 
 #include "../transition/Transition.h"
@@ -38,9 +38,9 @@ public:
     //   'S' = posicion inicial del cubo
     //   'G' = celda con oro
     //
-    // Las celdas de oro se numeran de arriba a abajo y de
-    // izquierda a derecha, coincidiendo con el indice de
-    // State::remainingGold y con GoldCells de Transition.h.
+    // Las celdas 'G' se almacenan en orden fila-columna en
+    // goldCells_. Solver las usa para construir el bitmask
+    // inicial de cellGold en State.
     //
     // Precondiciones (validadas con assert):
     //   - Exactamente 1 celda 'S'
@@ -92,12 +92,9 @@ public:
     // ----------------------------------------------------------
     // getGoldCells
     //
-    // Retorna las 6 posiciones (row, col) donde habia oro
-    // originalmente, en orden de arriba a abajo y de izquierda
-    // a derecha.
-    //
-    // Compatible directamente con GoldCells de Transition.h:
-    //   goldCells[i] corresponde a remainingGold[i] en State.
+    // Retorna las 6 posiciones (row, col) originales con oro,
+    // en orden fila-columna. Solver las usa para construir el
+    // bitmask inicial: bit (r*cols+c) encendido para cada 'G'.
     // ----------------------------------------------------------
     GoldCells getGoldCells() const;
 
@@ -120,16 +117,20 @@ private:
 };
 
 // ============================================================
-// generateNextStates
+// generateTransitions
 //
-// Genera todos los estados alcanzables desde current en un solo
-// movimiento valido sobre la grilla grid.
+// Genera todas las transiciones validas desde current en un solo
+// movimiento sobre la grilla grid.
 //
 // Para cada direccion (N, S, E, W):
 //   1. Calcula la celda destino
 //   2. Pregunta a Grid si el movimiento es valido
 //   3. Si es valido, delega en la funcion de Transition
-//   4. Agrega el Estado resultante al vector
+//   4. Agrega el TransitionResult resultante al vector
+//
+// Cada TransitionResult contiene:
+//   - nextState    : el estado resultante del movimiento
+//   - recogioOro   : true si ocurrio CASO 1 (pickup)
 //
 // Esta funcion es una capa de coordinacion:
 //   - No conoce la fisica del cubo (eso es de Transition)
@@ -139,7 +140,7 @@ private:
 // Prerequisito del caller: current.row/col estan dentro de la
 // grilla y en una celda valida (no es '#').
 // ============================================================
-std::vector<State> generateNextStates(
+std::vector<TransitionResult> generateTransitions(
     const State& current,
     const Grid&  grid
 );

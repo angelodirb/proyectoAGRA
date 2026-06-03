@@ -9,7 +9,6 @@
 
 #include <iostream>
 #include <string>
-#include <array>
 #include <set>
 #include "../transition/Transition.h"
 
@@ -30,42 +29,42 @@ void reportTest(const std::string& name, bool passed) {
 }
 
 // ============================================================
+// Constantes del layout de test
+//
+// Grilla conceptual de COLS=5 columnas.
+// Celdas de oro en: (0,0), (0,4), (2,0), (2,4), (4,2), (4,4)
+// ============================================================
+static const int COLS = 5;
+
+// Bitmask inicial con el oro en las 6 posiciones canonicas.
+// bit (row * COLS + col) encendido si esa celda tiene oro.
+static uint64_t makeInitCellGold() {
+    return (1ULL << (0*COLS+0)) | (1ULL << (0*COLS+4)) |
+           (1ULL << (2*COLS+0)) | (1ULL << (2*COLS+4)) |
+           (1ULL << (4*COLS+2)) | (1ULL << (4*COLS+4));
+}
+
+// Consultar si la celda (row, col) tiene oro en el estado dado.
+static bool cellHasGold(const State& s, int row, int col) {
+    return (s.cellGold & (1ULL << (row * COLS + col))) != 0;
+}
+
+// ============================================================
 // Helpers de construccion
 // ============================================================
 
-// Cubo estandar sin oro.
-//   top=0, bottom=1, north=2, south=3, east=4, west=5
 Cube makeFreshCube() {
     return Cube(0, 1, 2, 3, 4, 5);
-}
-
-// Layout de celdas de oro usado en todos los tests.
-//
-//   Indice | (row, col)
-//   -------|----------
-//     0    |  (0, 0)
-//     1    |  (0, 4)
-//     2    |  (2, 0)
-//     3    |  (2, 4)
-//     4    |  (4, 2)
-//     5    |  (4, 4)
-//
-// Se elige este layout para que las tests puedan planear
-// movimientos predecibles hacia celdas de oro especificas.
-GoldCells makeTestGoldCells() {
-    return {{{0,0}, {0,4}, {2,0}, {2,4}, {4,2}, {4,4}}};
 }
 
 // Estado de partida: cubo en (2,2), sin oro en caras,
 // todas las celdas de oro intactas.
 // (2,2) no es celda de oro: no hay interaccion inmediata.
 State makeStartState() {
-    std::array<bool,6> allRG = {true, true, true, true, true, true};
-    return State(2, 2, makeFreshCube(), allRG);
+    return State(2, 2, makeFreshCube(), makeInitCellGold());
 }
 
 // Verifica que los 6 face IDs del cubo sean distintos y en [0,5].
-// Util para detectar corrupcion de orientacion tras movimientos.
 bool isValidOrientation(const Cube& c) {
     int ids[6] = { c.getTop(), c.getBottom(), c.getNorth(),
                    c.getSouth(), c.getEast(), c.getWest() };
@@ -77,10 +76,11 @@ bool isValidOrientation(const Cube& c) {
     return true;
 }
 
-// Comprueba el invariante de conservacion de oro.
-// En cada instante: caras_del_cubo_con_oro + celdas_con_oro == 6.
+// Invariante de conservacion de oro:
+//   caras_del_cubo_con_oro + celdas_con_oro == totalGold
+// Incluye CASO3: gold depositado en celda cuenta en cellGoldCount.
 bool goldConserved(const State& s, int totalGold = 6) {
-    return s.cube.countGoldFaces() + s.remainingGoldCount() == totalGold;
+    return s.cube.countGoldFaces() + s.cellGoldCount() == totalGold;
 }
 
 // ============================================================
@@ -98,26 +98,24 @@ bool goldConserved(const State& s, int totalGold = 6) {
 void test1_posicion() {
     std::cout << "--- TEST 1: Cambio de posicion ---\n";
 
-    GoldCells gc = makeTestGoldCells();
-    State s = makeStartState();  // posicion (2,2)
+    State s = makeStartState();  // (2,2)
 
-    State sN = moveNorth(s, gc).nextState;
+    State sN = moveNorth(s, COLS).nextState;
     reportTest("test1a: moveNorth -> row=1",
                sN.row == 1 && sN.col == 2);
 
-    State sS = moveSouth(s, gc).nextState;
+    State sS = moveSouth(s, COLS).nextState;
     reportTest("test1b: moveSouth -> row=3",
                sS.row == 3 && sS.col == 2);
 
-    State sE = moveEast(s, gc).nextState;
+    State sE = moveEast(s, COLS).nextState;
     reportTest("test1c: moveEast -> col=3",
                sE.row == 2 && sE.col == 3);
 
-    State sW = moveWest(s, gc).nextState;
+    State sW = moveWest(s, COLS).nextState;
     reportTest("test1d: moveWest -> col=1",
                sW.row == 2 && sW.col == 1);
 
-    // Verificar que el estado original no fue modificado
     reportTest("test1e: estado original sin cambios (row)",
                s.row == 2);
     reportTest("test1f: estado original sin cambios (col)",
@@ -138,12 +136,9 @@ void test1_posicion() {
 void test2_rotacion() {
     std::cout << "\n--- TEST 2: Rotacion correcta del cubo ---\n";
 
-    GoldCells gc = makeTestGoldCells();
     State s = makeStartState();  // Cube(0,1,2,3,4,5) en (2,2)
 
-    // moveNorth -> rollNorth
-    // rollNorth: nuevo_top=sur=3, norte=top=0, bottom=norte=2, sur=bottom=1
-    State sN = moveNorth(s, gc).nextState;
+    State sN = moveNorth(s, COLS).nextState;
     reportTest("test2a: moveNorth -> bottom=2",
                sN.cube.getBottom() == 2);
     reportTest("test2b: moveNorth -> top=3",
@@ -151,25 +146,19 @@ void test2_rotacion() {
     reportTest("test2c: moveNorth -> north=0, south=1",
                sN.cube.getNorth() == 0 && sN.cube.getSouth() == 1);
 
-    // moveSouth -> rollSouth
-    // rollSouth: nuevo_top=norte=2, sur=top=0, bottom=sur=3, norte=bottom=1
-    State sS = moveSouth(s, gc).nextState;
+    State sS = moveSouth(s, COLS).nextState;
     reportTest("test2d: moveSouth -> bottom=3",
                sS.cube.getBottom() == 3);
     reportTest("test2e: moveSouth -> top=2",
                sS.cube.getTop() == 2);
 
-    // moveEast -> rollEast
-    // rollEast: nuevo_top=oeste=5, este=top=0, bottom=este=4, oeste=bottom=1
-    State sE = moveEast(s, gc).nextState;
+    State sE = moveEast(s, COLS).nextState;
     reportTest("test2f: moveEast -> bottom=4",
                sE.cube.getBottom() == 4);
     reportTest("test2g: moveEast -> top=5",
                sE.cube.getTop() == 5);
 
-    // moveWest -> rollWest
-    // rollWest: nuevo_top=este=4, oeste=top=0, bottom=oeste=5, este=bottom=1
-    State sW = moveWest(s, gc).nextState;
+    State sW = moveWest(s, COLS).nextState;
     reportTest("test2h: moveWest -> bottom=5",
                sW.cube.getBottom() == 5);
     reportTest("test2i: moveWest -> top=4",
@@ -177,30 +166,23 @@ void test2_rotacion() {
 }
 
 // ============================================================
-// TEST 3 - CASO 1: recoger oro cuando bottom NO tiene oro
+// TEST 3 - CASO 1: pickup cuando bottom NO tiene oro
 //
-// Setup:
-//   Cubo fresco en (2,1). Gold cell index 2 en (2,0).
-//   moveWest -> (2,0) = celda de oro.
-//
-// Tras rollWest: bottom = cara 5 (face 5 no tiene oro).
+// Cubo fresco en (2,1). Gold cell en (2,0).
+// moveWest -> (2,0): rollWest da bottom=face 5 (sin oro).
 //   -> CASO 1: cubo recoge oro de la celda.
-//   -> face 5 debe tener oro.
-//   -> remainingGold[2] debe ser false.
-//   -> TransitionResult::pickedUpGold == true.
+//   -> face 5 tiene oro.
+//   -> celda (2,0) queda sin oro (bit apagado).
+//   -> recogioOro == true.
 // ============================================================
-void test3_recogerOro() {
-    std::cout << "\n--- TEST 3: CASO 1 - recoger oro ---\n";
+void test3_caso1_pickup() {
+    std::cout << "\n--- TEST 3: CASO 1 - pickup ---\n";
 
-    GoldCells gc = makeTestGoldCells();
-    // Inicio en (2,1): un paso al oeste hay oro en (2,0) = gold[2]
-    std::array<bool,6> allRG = {true, true, true, true, true, true};
-    State s(2, 1, makeFreshCube(), allRG);
+    State s(2, 1, makeFreshCube(), makeInitCellGold());
 
-    TransitionResult tr = moveWest(s, gc);
+    TransitionResult tr = moveWest(s, COLS);
     const State& after = tr.nextState;
 
-    // Verificar posicion
     reportTest("test3a: llega a (2,0)",
                after.row == 2 && after.col == 0);
 
@@ -208,202 +190,206 @@ void test3_recogerOro() {
     reportTest("test3b: bottom es cara 5 tras rollWest",
                after.cube.getBottom() == 5);
 
-    // La cara que quedo abajo debe haber recogido el oro
+    // La cara que quedo abajo recoge el oro
     reportTest("test3c: cara 5 tiene oro (bottomHasGold)",
                after.cube.bottomHasGold());
-
     reportTest("test3d: faceHasGold(5) == true",
                after.cube.faceHasGold(5));
 
     // La celda perdio su oro
-    reportTest("test3e: remainingGold[2] == false (celda recogida)",
-               !after.remainingGold[2]);
+    reportTest("test3e: celda (2,0) ya no tiene oro (CASO 1)",
+               !cellHasGold(after, 2, 0));
 
-    // El resto de las celdas sigue intacto
-    reportTest("test3f: el resto de celdas siguen con oro",
-               after.remainingGold[0] && after.remainingGold[1] &&
-               after.remainingGold[3] && after.remainingGold[4] &&
-               after.remainingGold[5]);
+    // Las otras 5 celdas de oro siguen intactas
+    reportTest("test3f: celda (0,0) sigue con oro",  cellHasGold(after, 0, 0));
+    reportTest("test3g: celda (0,4) sigue con oro",  cellHasGold(after, 0, 4));
+    reportTest("test3h: celda (2,4) sigue con oro",  cellHasGold(after, 2, 4));
+    reportTest("test3i: celda (4,2) sigue con oro",  cellHasGold(after, 4, 2));
+    reportTest("test3j: celda (4,4) sigue con oro",  cellHasGold(after, 4, 4));
 
-    // Exactamente 1 cara del cubo tiene oro
-    reportTest("test3g: countGoldFaces == 1",
+    reportTest("test3k: countGoldFaces == 1",
                after.cube.countGoldFaces() == 1);
-
-    // Metadata: Transition reporto pickup real
-    reportTest("test3h: pickedUpGold == true (CASO 1 reportado correctamente)",
-               tr.pickedUpGold);
+    reportTest("test3l: recogioOro == true (CASO 1)",
+               tr.recogioOro);
 }
 
 // ============================================================
-// TEST 4 - CASO 2: intercambio cuando bottom YA tiene oro
+// TEST 4 - CASO 2: swap cuando bottom YA tiene oro
 //
-// Setup:
-//   Cubo en (2,1) con gold cell index 2 en (2,0).
-//   La cara 5 (que quedara abajo tras rollWest) ya tiene oro.
-//
-//   Para pre-cargar oro en cara 5 sin mover el cubo de posicion:
-//     rollWest  -> bottom = cara 5
-//     putGoldOnBottom -> cara 5 tiene oro
-//     rollEast  -> deshace la rotacion (cara 5 sigue con oro)
-//
-//   remainingGold[2] = true (la celda tiene oro).
-//   -> CASO 2: intercambio. El estado booleano no cambia.
-//   -> TransitionResult::pickedUpGold == false.
+// Cubo en (2,1) con face 5 pre-cargada con oro.
+// Gold cell (2,0) tiene oro.
+// moveWest -> (2,0): rollWest da bottom=face 5 (CON oro).
+//   -> CASO 2: intercambio. El estado visible no cambia.
+//   -> celda (2,0) sigue con oro.
+//   -> face 5 sigue con oro.
+//   -> recogioOro == false (costo A).
 // ============================================================
-void test4_intercambio() {
-    std::cout << "\n--- TEST 4: CASO 2 - intercambio ---\n";
+void test4_caso2_swap() {
+    std::cout << "\n--- TEST 4: CASO 2 - swap ---\n";
 
-    GoldCells gc = makeTestGoldCells();
+    // Pre-cargar oro en face 5 sin cambiar la orientacion final
+    Cube c = makeFreshCube();   // top=0, bottom=1, ..., west=5
+    c.rollWest();               // bottom = face 5
+    c.putGoldOnBottom();        // face 5 tiene oro
+    c.rollEast();               // deshace rollWest; face 5 sigue con oro
 
-    // Pre-cargar oro en cara 5 sin modificar la orientacion final
-    Cube c = makeFreshCube();     // top=0, bottom=1, ..., west=5
-    c.rollWest();                 // bottom = cara 5
-    c.putGoldOnBottom();          // cara 5 tiene oro
-    c.rollEast();                 // deshace rollWest (orientacion original, cara 5 sigue con oro)
+    State s(2, 1, c, makeInitCellGold());
 
-    // Verificar pre-condicion del setup
-    // (rollEast es la inversa de rollWest: volvemos al Cube(0,1,2,3,4,5))
-    // Cara 5 debe tener oro pero estar en posicion "west"
-    // remainingGold[2] = true: la celda (2,0) aun tiene oro
-    std::array<bool,6> rg = {true, true, true, true, true, true};
-    State s(2, 1, c, rg);
-
-    // Precondicion: cara 5 ya tiene oro
-    reportTest("test4a: precondicion - cara 5 tiene oro antes del movimiento",
+    reportTest("test4a: precondicion - face 5 tiene oro",
                s.cube.faceHasGold(5));
     reportTest("test4b: precondicion - celda (2,0) tiene oro",
-               s.remainingGold[2]);
+               cellHasGold(s, 2, 0));
 
-    TransitionResult tr = moveWest(s, gc);
+    TransitionResult tr = moveWest(s, COLS);
     const State& after = tr.nextState;
 
-    // Tras rollWest: bottom = cara 5 (que ya tiene oro) -> CASO 2
-
-    // La celda SIGUE teniendo oro (intercambio, no se consume)
-    reportTest("test4c: remainingGold[2] sigue true (celda conserva oro)",
-               after.remainingGold[2]);
-
-    // La cara del cubo SIGUE teniendo oro
-    reportTest("test4d: cara 5 sigue con oro tras intercambio",
+    // CASO 2: celda sigue con oro, cara sigue con oro
+    reportTest("test4c: celda (2,0) conserva su oro (CASO 2)",
+               cellHasGold(after, 2, 0));
+    reportTest("test4d: face 5 sigue con oro tras swap",
                after.cube.faceHasGold(5));
-
-    // La cantidad total de caras con oro no cambia
     reportTest("test4e: countGoldFaces no cambia (sigue en 1)",
                after.cube.countGoldFaces() == 1);
 
-    // Oro total del sistema = caras_cubo + celdas_con_oro
-    // Antes: 1 (cara 5) + 6 (todas las celdas) = 7
-    // Despues: 1 + 6 = 7 (sin cambio)
-    reportTest("test4f: oro total del sistema no cambia",
-               after.cube.countGoldFaces() + after.remainingGoldCount() ==
-               s.cube.countGoldFaces()     + s.remainingGoldCount());
+    // Conservacion total: caras + celdas antes == despues
+    reportTest("test4f: conservacion total invariante",
+               after.cube.countGoldFaces() + after.cellGoldCount() ==
+               s.cube.countGoldFaces()     + s.cellGoldCount());
 
-    // Metadata: Transition NO reporto pickup (es CASO 2)
-    reportTest("test4g: pickedUpGold == false (CASO 2 reportado correctamente)",
-               !tr.pickedUpGold);
+    reportTest("test4g: recogioOro == false (CASO 2, costo A)",
+               !tr.recogioOro);
 }
 
 // ============================================================
-// TEST 5 - El oro total se conserva en todo momento
+// TEST 5 - CASO 3: deposit cuando bottom tiene oro y celda esta vacia
 //
-// Invariante: cube.countGoldFaces() + remainingGoldCount() == 6
-//
-// Se verifica paso a paso en una secuencia de movimientos
-// que incluye celdas sin oro, CASO 1 y verificacion continua.
-//
-// Ruta (desde (3,1), gold cells en (2,0) y (4,2)):
-//   moveWest  -> (3,0)  : no es celda de oro
-//   moveNorth -> (2,0)  : gold[2] -> CASO 1 (bottom = cara 2)
-//   moveNorth -> (1,0)  : no es celda de oro
-//   moveEast  -> (1,1)  : no es celda de oro
-//   moveSouth -> (2,1)  : no es celda de oro
-//
-// Traza de la cara bottom en cada paso:
-//   inicial          : bottom=1
-//   tras rollWest    : bottom=5
-//   tras rollNorth   : bottom=2   <- recoge en (2,0)
-//   tras rollNorth   : bottom=4
-//   tras rollEast    : bottom=1
-//   tras rollSouth   : bottom=4
+// Cubo en (2,1) con face 5 cargada con oro.
+// Celda (2,0) SIN oro (bit apagado artificialmente).
+// moveWest -> (2,0): rollWest da bottom=face 5 (CON oro), celda vacia.
+//   -> CASO 3: la cara deposita su oro en la celda.
+//   -> celda (2,0) recibe oro (bit encendido).
+//   -> face 5 pierde oro.
+//   -> recogioOro == false (costo A).
 // ============================================================
-void test5_conservacionOro() {
-    std::cout << "\n--- TEST 5: Conservacion del oro total ---\n";
+void test5_caso3_deposit() {
+    std::cout << "\n--- TEST 5: CASO 3 - deposit ---\n";
 
-    GoldCells gc = makeTestGoldCells();
-    std::array<bool,6> allRG = {true, true, true, true, true, true};
-    State s(3, 1, makeFreshCube(), allRG);
+    // Misma pre-carga de face 5 que en test4
+    Cube c = makeFreshCube();
+    c.rollWest();
+    c.putGoldOnBottom();   // face 5 tiene oro
+    c.rollEast();
 
-    const int TOTAL = 6;
-    reportTest("test5a: invariante en estado inicial",
-               goldConserved(s, TOTAL));
+    // Celda (2,0) sin oro: apagar bit 10 = 2*5+0
+    uint64_t cellGoldSin20 = makeInitCellGold() & ~(1ULL << (2*COLS+0));
 
-    s = moveWest(s, gc).nextState;   // (3,0): no oro
-    reportTest("test5b: invariante tras moveWest a (3,0)",
-               goldConserved(s, TOTAL));
+    State s(2, 1, c, cellGoldSin20);
 
-    // (2,0) = gold[2] -> CASO 1: cara bottom recoge oro
-    s = moveNorth(s, gc).nextState;
-    reportTest("test5c: invariante tras moveNorth a (2,0) [CASO 1]",
-               goldConserved(s, TOTAL));
-    reportTest("test5d: celda (2,0) ya recogida",
-               !s.remainingGold[2]);
-    reportTest("test5e: cube ahora tiene 1 cara con oro",
+    reportTest("test5a: precondicion - face 5 tiene oro",
+               s.cube.faceHasGold(5));
+    reportTest("test5b: precondicion - celda (2,0) sin oro",
+               !cellHasGold(s, 2, 0));
+
+    TransitionResult tr = moveWest(s, COLS);
+    const State& after = tr.nextState;
+
+    reportTest("test5c: llega a (2,0)",
+               after.row == 2 && after.col == 0);
+
+    // CASO 3: cara deposita oro en celda vacia
+    reportTest("test5d: celda (2,0) recibio oro del cubo (CASO 3)",
+               cellHasGold(after, 2, 0));
+    reportTest("test5e: face 5 ya no tiene oro",
+               !after.cube.faceHasGold(5));
+    reportTest("test5f: countGoldFaces disminuyo en 1",
+               after.cube.countGoldFaces() == s.cube.countGoldFaces() - 1);
+    reportTest("test5g: cellGoldCount aumento en 1",
+               after.cellGoldCount() == s.cellGoldCount() + 1);
+
+    // Conservacion total: oro se movi o de cara a celda, total igual
+    reportTest("test5h: conservacion total invariante (CASO 3)",
+               after.cube.countGoldFaces() + after.cellGoldCount() ==
+               s.cube.countGoldFaces()     + s.cellGoldCount());
+
+    reportTest("test5i: recogioOro == false (CASO 3, costo A)",
+               !tr.recogioOro);
+}
+
+// ============================================================
+// TEST 6 - Conservacion del oro a traves de secuencia de movimientos
+//
+// Invariante: cube.countGoldFaces() + cellGoldCount() == 6 en todo momento.
+//
+// La secuencia pasa por CASO 1 en (2,0) y potencialmente CASO 3
+// en pasos posteriores. El invariante se mantiene independientemente.
+//
+// Ruta desde (3,1):
+//   moveWest  -> (3,0)  : celda sin oro
+//   moveNorth -> (2,0)  : gold cell -> CASO 1 (bottom=face 2 recoge)
+//   moveNorth -> (1,0)  : celda sin oro
+//   moveEast  -> (1,1)  : celda sin oro
+//   moveSouth -> (2,1)  : celda sin oro, PERO bottom es face 2 (con oro)
+//                         -> CASO 3: face 2 deposita en (2,1)
+// ============================================================
+void test6_conservacionOro() {
+    std::cout << "\n--- TEST 6: Conservacion del oro (CASO 1 + CASO 3) ---\n";
+
+    State s(3, 1, makeFreshCube(), makeInitCellGold());
+
+    reportTest("test6a: invariante en estado inicial",
+               goldConserved(s));
+
+    s = moveWest(s, COLS).nextState;     // (3,0): sin oro
+    reportTest("test6b: invariante tras moveWest a (3,0)",
+               goldConserved(s));
+
+    // CASO 1 en (2,0)
+    s = moveNorth(s, COLS).nextState;
+    reportTest("test6c: invariante tras moveNorth a (2,0) [CASO 1]",
+               goldConserved(s));
+    reportTest("test6d: celda (2,0) ya no tiene oro",
+               !cellHasGold(s, 2, 0));
+    reportTest("test6e: cube tiene exactamente 1 cara con oro",
                s.cube.countGoldFaces() == 1);
 
-    s = moveNorth(s, gc).nextState;  // (1,0): no oro
-    reportTest("test5f: invariante tras moveNorth a (1,0)",
-               goldConserved(s, TOTAL));
+    s = moveNorth(s, COLS).nextState;    // (1,0): sin oro
+    reportTest("test6f: invariante tras moveNorth a (1,0)",
+               goldConserved(s));
 
-    s = moveEast(s, gc).nextState;   // (1,1): no oro
-    reportTest("test5g: invariante tras moveEast a (1,1)",
-               goldConserved(s, TOTAL));
+    s = moveEast(s, COLS).nextState;     // (1,1): sin oro
+    reportTest("test6g: invariante tras moveEast a (1,1)",
+               goldConserved(s));
 
-    s = moveSouth(s, gc).nextState;  // (2,1): no oro
-    reportTest("test5h: invariante tras moveSouth a (2,1)",
-               goldConserved(s, TOTAL));
-
-    // Confirmar estado final coherente
-    reportTest("test5i: posicion final es (2,1)",
+    // (2,1) esta vacio y la cara con oro queda abajo -> CASO 3
+    s = moveSouth(s, COLS).nextState;
+    reportTest("test6h: invariante tras moveSouth a (2,1) [posible CASO 3]",
+               goldConserved(s));
+    reportTest("test6i: posicion final es (2,1)",
                s.row == 2 && s.col == 1);
-    reportTest("test5j: countGoldFaces sigue siendo 1",
-               s.cube.countGoldFaces() == 1);
-    reportTest("test5k: remainingGoldCount es 5",
-               s.remainingGoldCount() == 5);
+    reportTest("test6j: invariante de conservacion en estado final",
+               goldConserved(s));
 }
 
 // ============================================================
-// TEST 6 - Secuencias de movimientos mantienen invariantes
+// TEST 7 - Invariantes en secuencia larga de movimientos
 //
-// Se aplica una secuencia larga de movimientos y se verifica
-// en cada paso:
-//   A) orientacion del cubo valida (6 IDs distintos, en [0,5])
-//   B) conservacion del oro
-//   C) que la posicion es exactamente la esperada
+// A) Orientacion del cubo valida (6 IDs distintos, en [0,5])
+// B) Conservacion del oro en cada paso
+// C) Posicion final correcta
 //
-// La secuencia da una vuelta alrededor del centro de la grilla
-// y pasa por varias celdas de oro.
+// La secuencia recorre el perimetro de una grilla 5x5 pasando
+// por todas las celdas de oro.
 // ============================================================
-void test6_invariantesSecuencia() {
-    std::cout << "\n--- TEST 6: Invariantes en secuencia de movimientos ---\n";
+void test7_invariantesSecuencia() {
+    std::cout << "\n--- TEST 7: Invariantes en secuencia larga ---\n";
 
-    GoldCells gc = makeTestGoldCells();
-    std::array<bool,6> allRG = {true, true, true, true, true, true};
-    State s(1, 1, makeFreshCube(), allRG);
+    State s(1, 1, makeFreshCube(), makeInitCellGold());
 
-    const int TOTAL = 6;
     bool orientationOk = true;
     bool goldOk        = true;
 
-    // Secuencia: se aplican 16 movimientos que forman un recorrido
-    // pasando por celdas de oro en (2,0), (2,4), (4,2), (4,4).
-    //
-    // Paso a paso:
-    //   (1,1) ->W-> (1,0) ->S-> (2,0)[g2] ->S-> (3,0) ->S-> (4,0)
-    //         ->E-> (4,1) ->E-> (4,2)[g4] ->E-> (4,3) ->E-> (4,4)[g5]
-    //         ->N-> (3,4) ->N-> (2,4)[g3] ->N-> (1,4) ->N-> (0,4)[g1]
-    //         ->W-> (0,3) ->W-> (0,2) ->W-> (0,1) ->W-> (0,0)[g0]
-
-    using MoveFunc = TransitionResult(*)(const State&, const GoldCells&);
+    // 16 movimientos: un recorrido que visita (2,0),(4,2),(4,4),(2,4),(0,4),(0,0)
+    using MoveFunc = TransitionResult(*)(const State&, int);
     MoveFunc moves[] = {
         moveWest, moveSouth, moveSouth, moveSouth,
         moveEast, moveEast,  moveEast,  moveEast,
@@ -412,82 +398,62 @@ void test6_invariantesSecuencia() {
     };
 
     for (int i = 0; i < 16; ++i) {
-        s = moves[i](s, gc).nextState;
+        s = moves[i](s, COLS).nextState;
         if (!isValidOrientation(s.cube)) orientationOk = false;
-        if (!goldConserved(s, TOTAL))    goldOk        = false;
+        if (!goldConserved(s))           goldOk        = false;
     }
 
-    reportTest("test6a: orientacion valida en todos los pasos",
+    reportTest("test7a: orientacion valida en todos los pasos",
                orientationOk);
-    reportTest("test6b: oro conservado en todos los pasos",
+    reportTest("test7b: oro conservado en todos los pasos",
                goldOk);
-
-    // Al final del recorrido estamos en (0,0) = gold[0]
-    // (0,0) fue la ultima celda visitada -> recogida
-    reportTest("test6c: posicion final es (0,0)",
+    reportTest("test7c: posicion final es (0,0)",
                s.row == 0 && s.col == 0);
-
-    // Se visitaron gold[2]:(2,0), gold[4]:(4,2), gold[5]:(4,4),
-    // gold[3]:(2,4), gold[1]:(0,4), gold[0]:(0,0)
-    // (dependiendo de si la cara bottom tenia oro o no en cada visita)
-    // La conservacion garantiza que el resultado es coherente.
-    reportTest("test6d: countGoldFaces + remainingGoldCount == 6",
-               s.cube.countGoldFaces() + s.remainingGoldCount() == TOTAL);
+    reportTest("test7d: conservacion en estado final",
+               s.cube.countGoldFaces() + s.cellGoldCount() == 6);
 }
 
 // ============================================================
-// TEST 7 - Los movimientos no modifican el estado original
+// TEST 8 - Los movimientos no modifican el estado original
 //
 // Verifica value semantics: cada funcion de movimiento trabaja
 // sobre una copia interna y retorna el nuevo estado.
-// El estado pasado como parametro debe quedar identico.
+// El estado original debe quedar identico.
 // ============================================================
-void test7_valueSemantics() {
-    std::cout << "\n--- TEST 7: Value semantics (original sin cambios) ---\n";
+void test8_valueSemantics() {
+    std::cout << "\n--- TEST 8: Value semantics (original sin cambios) ---\n";
 
-    GoldCells gc = makeTestGoldCells();
+    State original(2, 1, makeFreshCube(), makeInitCellGold());
 
-    // Setup: cubo en (2,1), un paso al oeste hay gold en (2,0)
-    std::array<bool,6> allRG = {true, true, true, true, true, true};
-    State original(2, 1, makeFreshCube(), allRG);
+    // moveWest hacia (2,0): recoge oro (CASO 1)
+    State afterN = moveNorth(original, COLS).nextState;
+    State afterS = moveSouth(original, COLS).nextState;
+    State afterE = moveEast(original, COLS).nextState;
+    State afterW = moveWest(original, COLS).nextState;
 
-    // Aplicar todos los movimientos usando el estado original
-    State afterN = moveNorth(original, gc).nextState;
-    State afterS = moveSouth(original, gc).nextState;
-    State afterE = moveEast(original, gc).nextState;
-    State afterW = moveWest(original, gc).nextState;  // este recoge oro en (2,0)
-
-    // afterW recogio oro: la cara 5 tiene oro y remainingGold[2]=false
-    // Pero el original NO debe haber cambiado
-
-    reportTest("test7a: original.row sin cambios",
+    // El original NO debe haber cambiado
+    reportTest("test8a: original.row sin cambios",
                original.row == 2);
-    reportTest("test7b: original.col sin cambios",
+    reportTest("test8b: original.col sin cambios",
                original.col == 1);
-    reportTest("test7c: orientacion original intacta (bottom=1)",
+    reportTest("test8c: orientacion original intacta (bottom=1)",
                original.cube.getBottom() == 1);
-    reportTest("test7d: original sin oro en caras (countGoldFaces=0)",
+    reportTest("test8d: original sin oro en caras (countGoldFaces=0)",
                original.cube.countGoldFaces() == 0);
-    reportTest("test7e: original.remainingGold[2] intacto (true)",
-               original.remainingGold[2]);
-    reportTest("test7f: original.remainingGoldCount() == 6",
-               original.remainingGoldCount() == 6);
+    reportTest("test8e: original.cellGold intacto",
+               original.cellGold == makeInitCellGold());
 
-    // Verificar que el resultado de moveWest SI cambio
-    reportTest("test7g: afterW tiene oro en cara 5 (recogio)",
+    // afterW si recoge oro en (2,0)
+    reportTest("test8f: afterW tiene oro en cara 5",
                afterW.cube.faceHasGold(5));
-    reportTest("test7h: afterW.remainingGold[2] == false",
-               !afterW.remainingGold[2]);
+    reportTest("test8g: afterW: celda (2,0) sin oro (CASO 1)",
+               !cellHasGold(afterW, 2, 0));
 
-    // Verificar que los otros movimientos tampoco modificaron el original
-    reportTest("test7i: afterN.row == 1 (moveNorth funciono)",
-               afterN.row == 1);
-    reportTest("test7j: afterS.row == 3 (moveSouth funciono)",
-               afterS.row == 3);
-    reportTest("test7k: afterE.col == 2 (moveEast funciono)",
-               afterE.col == 2);
-    reportTest("test7l: afterW.col == 0 (moveWest funciono)",
-               afterW.col == 0);
+    // Los demas movimientos funcionaron
+    reportTest("test8h: afterN.row == 1", afterN.row == 1);
+    reportTest("test8i: afterS.row == 3", afterS.row == 3);
+    reportTest("test8j: afterE.col == 2", afterE.col == 2);
+    reportTest("test8k: afterW.col == 0", afterW.col == 0);
 }
 
 // ============================================================
@@ -500,11 +466,12 @@ int main() {
 
     test1_posicion();
     test2_rotacion();
-    test3_recogerOro();
-    test4_intercambio();
-    test5_conservacionOro();
-    test6_invariantesSecuencia();
-    test7_valueSemantics();
+    test3_caso1_pickup();
+    test4_caso2_swap();
+    test5_caso3_deposit();
+    test6_conservacionOro();
+    test7_invariantesSecuencia();
+    test8_valueSemantics();
 
     std::cout << "\n===========================================\n";
     std::cout << "  Resultado: " << testsPassed << " passed, "

@@ -1,0 +1,51 @@
+===========================================
+  Cost Tests
+===========================================
+
+--- TEST 1: movementCost -> A (destino sin posicion de oro) ---
+[PASS] test1a: A=5,  B=10, destino no-oro -> 5
+[PASS] test1b: A=1,  B=99, destino no-oro -> 1
+[PASS] test1c: A=20, B=3,  destino no-oro -> 20
+[PASS] test1d: A=18, B=1,  destino no-oro -> 18
+
+--- TEST 2: movementCost -> B (destino es posicion de oro) ---
+[PASS] test2a: A=2,  B=9,  CASO 1 -> 9
+[PASS] test2b: A=2,  B=9,  oro ya recogido -> IGUAL B=9
+[PASS] test2c: A=2,  B=9,  CASO 2 -> B=9
+[PASS] test2d: A=18, B=1,  destino oro -> 1
+[PASS] test2e: A=1,  B=4,  destino oro -> 4
+[PASS] test2f: A=3,  B=20, destino oro -> 20
+
+--- TEST 3: movementCost con A == B ---
+[PASS] test3a: A=B=7, destino no-oro -> 7
+[PASS] test3b: A=B=7, destino oro   -> 7
+[PASS] test3c: A=B=1, ambos identicos
+
+--- TEST 4: 'from' es irrelevante para el costo ---
+[PASS] test4a: from sin oro, cubo fresco -> B=5
+[PASS] test4b: from sin remaining gold  -> B=5
+[PASS] test4c: from cubo con oro        -> B=5
+
+--- TEST 5: Integracion A=B=1 (costo uniforme = num movimientos) ---
+[PASS] test5a: A=B=1 -> resultado == 6 (min movimientos)
+
+--- TEST 6: Caso 4 oficial (A=3, B=20) -> 144 ---
+[FAIL] test6a: solve(A=3, B=20) == 144
+
+--- TEST 7: Caso 18 oficial (A=1, B=4) -> 34 ---
+[FAIL] test7a: solve(A=1, B=4) == 34
+
+--- TEST 8: Caso 10 oficial (A=18, B=1) -> 44 ---
+[FAIL] test8a: solve(A=18, B=1) == 44
+
+--- TEST 9: Caso 1 oficial (A=2, B=9) -> 69 ---
+[PASS] test9a: solve(A=2, B=9) == 69
+
+--- TEST 10: Invariante A=B implica proporcionalidad ---
+[PASS] test10a: solve(A=2, B=2) == 2 * solve(A=1,B=1)
+[PASS] test10b: solve(A=5, B=5) == 5 * solve(A=1,B=1)
+[PASS] test10c: solve(A=10,B=10)== 10* solve(A=1,B=1)
+
+===========================================
+  Resultado: 21 passed, 3 failed
+===========================================

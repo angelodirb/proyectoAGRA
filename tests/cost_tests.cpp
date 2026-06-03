@@ -1,14 +1,14 @@
 // ============================================================
 // cost_tests.cpp
-// Pruebas unitarias para movementCost(bool pickedUpGold, int A, int B).
+// Pruebas unitarias para movementCost(bool recogioOro, int A, int B).
 //
 // La nueva firma recibe el evento fisico directamente desde
-// TransitionResult::pickedUpGold — no necesita inspeccionar
+// TransitionResult::recogioOro — no necesita inspeccionar
 // State ni Cube. Los tests reflejan esa simplificacion.
 //
 // Cubre:
-//   TEST 1 — pickup real (pickedUpGold=true)   -> retorna B
-//   TEST 2 — no pickup   (pickedUpGold=false)  -> retorna A
+//   TEST 1 — pickup real (recogioOro=true)   -> retorna B
+//   TEST 2 — no pickup   (recogioOro=false)  -> retorna A
 //   TEST 3 — A == B (edge case)                -> mismo valor siempre
 //
 // Compilar (desde la raiz del proyecto):
@@ -32,14 +32,14 @@ void reportTest(const std::string& name, bool passed) {
 }
 
 // ============================================================
-// TEST 1 — Pickup real (pickedUpGold = true) -> retorna B
+// TEST 1 — Pickup real (recogioOro = true) -> retorna B
 //
 // Transition reporto CASO 1: la celda tenia oro y la cara
 // inferior estaba vacia antes del intercambio.
 // Cost debe retornar B sin importar el valor de A.
 // ============================================================
 void test1_pickupReal() {
-    std::cout << "--- TEST 1: Pickup real (pickedUpGold=true) ---\n";
+    std::cout << "--- TEST 1: Pickup real (recogioOro=true) ---\n";
 
     reportTest("test1a: A=1,  B=5   -> retorna B=5",   movementCost(true, 1, 5)   == 5);
     reportTest("test1b: A=10, B=3   -> retorna B=3",   movementCost(true, 10, 3)  == 3);
@@ -48,17 +48,16 @@ void test1_pickupReal() {
 }
 
 // ============================================================
-// TEST 2 — No pickup (pickedUpGold = false) -> retorna A
+// TEST 2 — No pickup (recogioOro = false) -> retorna A
 //
-// Cubre todos los casos que NO son CASO 1:
-//   - Movimiento a celda sin oro.
-//   - CASO 2 (swap): cara inferior ya tenia oro.
-//   - Segunda visita a celda ya recogida.
-// En todos ellos Transition reporta pickedUpGold=false.
+// Cubre CASO 2, CASO 3 y CASO 4 (recogioOro=false en todos):
+//   - CASO 2: ambos tienen oro (sin efecto neto).
+//   - CASO 3: cara inferior con oro, celda vacia (deposito).
+//   - CASO 4: movimiento a celda sin oro, cara inferior vacia.
 // Cost debe retornar A.
 // ============================================================
 void test2_noPickup() {
-    std::cout << "\n--- TEST 2: No pickup (pickedUpGold=false) ---\n";
+    std::cout << "\n--- TEST 2: No pickup (recogioOro=false) ---\n";
 
     reportTest("test2a: A=1,  B=9  -> retorna A=1",  movementCost(false, 1, 9)   == 1);
     reportTest("test2b: A=3,  B=20 -> retorna A=3",  movementCost(false, 3, 20)  == 3);
@@ -70,7 +69,7 @@ void test2_noPickup() {
 // TEST 3 — A == B (edge case)
 //
 // Si ambos costos son iguales, movementCost debe retornar
-// ese valor para cualquier valor de pickedUpGold.
+// ese valor para cualquier valor de recogioOro.
 // Verifica que la funcion no tiene valores magicos ni calcula
 // un costo distinto de A o B.
 // ============================================================
